@@ -1,7 +1,7 @@
 using LinearAlgebra, Distributions, Statistics
 
 include("generate.jl")
-include("trunnormal.jl")
+include("truncnorm.jl")
 
 function LDL(Σ::Symmetric{Float64,Array{Float64,2}}, m::Int, d::Int)
     """
