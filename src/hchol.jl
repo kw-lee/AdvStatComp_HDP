@@ -2,6 +2,7 @@
     Julia implementation for Genton, M. G., Keyes, D. E., & Turkiyyah, G. (2018). Hierarchical decompositions for the computation of high-dimensional multivariate normal probabilities. Journal of Computational and Graphical Statistics, 27(2), 268-277.
     You can download original C++ codes at https://amstat.tandfonline.com/doi/abs/10.1080/10618600.2017.1375936
 """
+
 using LinearAlgebra
 using Distributions
 
@@ -48,7 +49,7 @@ function updateTree!(UV::Tnode, A::SubArray{T, 2}, tol) where T<:AbstractFloat
     end
 
     if (rank>1)&(rank==kmax) 
-        print("Warning: max rank reached")
+        println("Warning: max rank reached")
     end
 
     s2 = sqrt.(s[1:rank])
@@ -93,6 +94,7 @@ end
 
 """
     Build a dense Cholesky decomposition and put it in Hierarchical matrix format
+    todo: split size 2 to general integer d (Cao2019)
 """
 function hchol(A::Matrix{T}, m::Int; tol=convert(T, 1e-8)) where T<: AbstractFloat
     n = size(A, 1)
@@ -104,7 +106,7 @@ function hchol(A::Matrix{T}, m::Int; tol=convert(T, 1e-8)) where T<: AbstractFlo
 
     L = cholesky(A).L
 
-    B = Vector{Any}(undef, nb)
+    B = Vector{LowerTriangular{T,Array{T,2}}}(undef, nb)
     for i in 1:nb
         # diagonal matrix B
         B[i] = LowerTriangular(L[(i-1)*m+1:i*m, (i-1)*m+1:i*m])
@@ -127,6 +129,41 @@ function hchol(A::Matrix{T}, m::Int; tol=convert(T, 1e-8)) where T<: AbstractFlo
 end
 
 """
+    uncompress()
+    To be Declared
+    generates the explicit matrix lower triangular part only
+"""
+function uncompress(B::Array{LowerTriangular{T,Array{T,2}},1}, UV::Array{Tnode,1}) where T<: AbstractFloat
+    
+    nb = length(B)
+    m = size(B[1], 1)
+    L = zeros(T, nb*m, nb*m)
+    L = LowerTriangular(L)
+    for i in 1:nb
+        L[(i-1)*m+1:i*m, (i-1)*m+1:i*m] = B[i]
+    end
+
+    for UV_i in UV
+        L[UV_i.i1:UV_i.i1+UV_i.bsz-1, UV_i.j1:UV_i.j1+UV_i.bsz-1] = UV_i.U * UV_i.V'
+    end
+
+    return(L)
+end
+
+
+"""
+    displayTree()
+    Display H-matrix
+"""
+function displayTree(Tree::Array{Tnode,1})
+    for UV_i in Tree
+        block = [UV_i.i1:UV_i.i1+UV_i.bsz-1, UV_i.j1:UV_i.j1+UV_i.bsz-1]
+        rank = UV_i.rank
+        println("Block: ", block, ", Rank: ", rank)
+    end
+end
+
+"""
     hstats()
     To be Declared
 """
@@ -134,18 +171,8 @@ function hstats()
     return 0
 end
 
-
 """
-    uncompress()
-    To be Declared
-    generates the explicit matrix---lower triangular part only
-"""
-function uncompress()
-    return 0
-end
-
-"""
-    block ordering
+    permute Tree by block ordering
 """
 function permuteTree(UV, order::Vector{Int})
     # uvsize = length(UV)
@@ -154,21 +181,8 @@ end
 
 """
     inorder()
+    compute block order
 """
 function inorder()
 
 end
-
-"""
-    displayTree
-"""
-function displayTree()
-
-end
-
-# # test
-# A = rand(Normal(0,1), 8, 8)
-# A = A'A
-# m = 2
-
-# B, UV = hchol(A, m)
