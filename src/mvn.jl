@@ -6,16 +6,16 @@ using StatsFuns
 """
     mvndns(n, N, L, x, a, b; tol)
     input:
-        - n: The number of sample size
+        - n: dimension
         - N: Randomized QMC points
         - L: cholesky factor of the covariance matrix
         - a: lower bound
         - b: upper bound
     output:
         - p: estimated probabiliy
-        - y: samples
+        - y: samples, Ly ~ truncated_normal(0, LL'; a, b)
 """
-function mvndns(n::Int, N::Int, L::AbstractMatrix{T}, x::AbstractMatrix{T}, 
+function mvndns(n::Int, N::Int, L::LowerTriangular{T,Array{T,2}}, x::AbstractMatrix{T}, 
     a::Matrix{T}, b::Matrix{T}, tol::T) where T<: AbstractFloat
 
     ALMOSTONE = 1-tol
@@ -66,7 +66,12 @@ end
         - p_mean: estimated probabiliy
         - p_se: standard error
 """
-function mvn(L::AbstractMatrix{T}, a1::Vector{T}, b1::Vector{T}, ns::Int, N::Int; tol = convert(T, 1e-8)) where T<:AbstractFloat
+function mvn(L::LowerTriangular{T,Array{T,2}}, a1::Vector{T}, b1::Vector{T}, 
+    ns::Int, N::Int; tol = convert(T, 1e-8),
+    μ::Array{T,1} = zeros(T, length(a1))) where T<:AbstractFloat
+
+    a1 -= μ # centering
+    b1 -= μ # centering
 
     # values produced by the ns samples, each with N randomized qmc points
     values = Vector{T}(undef, ns) 
@@ -99,7 +104,6 @@ function mvn(L::AbstractMatrix{T}, a1::Vector{T}, b1::Vector{T}, ns::Int, N::Int
         values[i] = mean(p)
     end
     p_mean = mean(values) # estimated probabiliy
-    p_se = std(values) / sqrt(ns) # standard error
 
-    return (p_mean, p_se)
+    return p_mean
 end

@@ -27,7 +27,8 @@ function LDL(Σ::Symmetric{Float64,Array{Float64,2}}, m::Int, d::Int)
     end
 end
 
-function CMVN(Σ::Symmetric{Float64,Array{Float64,2}}, a::Array{Float64,1}, b::Array{Float64,1}, d::Int64, m::Int64)
+function CMVN(Σ::Symmetric{Float64,Array{Float64,2}}, a::Array{Float64,1}, b::Array{Float64,1}, d::Int64, m::Int64,
+    ns::Int64, N::Int64)
     """
         Algorithm 2 in Cao2019 
     """
@@ -46,7 +47,8 @@ function CMVN(Σ::Symmetric{Float64,Array{Float64,2}}, a::Array{Float64,1}, b::A
         # P *= cdf_trunnormal(a1, b1, zeros(d), copy(Symmetric(D1)))
         # y[(j + 1):(j + d)] .= ex_trunnormal(a1, b1, zeros(d), copy(Symmetric(D1)))
         # use ns=10 and N=1000 which is same in Genton2018
-        (p_i, y_i) = mvn(L1, a1, b1, 10, 1000)
+        p_i = mvn(L1, a1, b1, ns, N)
+        y_i = exp_truncnormal(a1, b1, Symmetric(D1); ns = ns, N = N)
 
         P *= p_i
         y[(j + 1):(j + d)] .= y_i
