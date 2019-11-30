@@ -25,3 +25,6 @@ refs/
 *.vrb
 *.xdv
 *.synctex.gz
+
+# ipynb
+*.ipynb_checkpoints
