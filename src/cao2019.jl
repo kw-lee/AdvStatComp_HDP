@@ -2,6 +2,7 @@ using LinearAlgebra, Distributions, Statistics
 
 include("generate.jl")
 include("truncnorm.jl")
+include("mvn.jl")
 
 function LDL(Σ::Symmetric{Float64,Array{Float64,2}}, m::Int, d::Int)
     """
@@ -41,9 +42,14 @@ function CMVN(Σ::Symmetric{Float64,Array{Float64,2}}, a::Array{Float64,1}, b::A
         b1 = b[(j + 1):(j + d)] .- g
         D1 = D[(j + 1):(j + d), (j + 1):(j + d)]
         
-        P *= cdf_trunnormal(a1, b1, zeros(d), copy(Symmetric(D1)))
-        
-        y[(j + 1):(j + d)] .= ex_trunnormal(a1, b1, zeros(d), copy(Symmetric(D1)))
+        L1 = chol(D1).L
+        # P *= cdf_trunnormal(a1, b1, zeros(d), copy(Symmetric(D1)))
+        # y[(j + 1):(j + d)] .= ex_trunnormal(a1, b1, zeros(d), copy(Symmetric(D1)))
+        # use ns=10 and N=1000 which is same in Genton2018
+        (p_i, y_i) = mvn(L1, a1, b1, 10, 1000)
+
+        P *= p_i
+        y[(j + 1):(j + d)] = y_i[1:end]
     end
     return (P, y)
 end

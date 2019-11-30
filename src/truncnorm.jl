@@ -1,6 +1,7 @@
 using LinearAlgebra, Distributions, Statistics
 
 #원래는 Quasi인데 일단 그냥 Monte-Carlo로
+# 구현 완료 - 20191130 by kwlee at mvn.jl
 function cdf_trunnormal(a::Array{Float64,1}, b::Array{Float64,1},μ::Array{Float64,1},Σ::Symmetric{Float64,Array{Float64,2}}; cnts = 10000)
     """
         calculate normal-cdf from a to b using **Monte-Carlo** simulation (Not quasi-MC: Todo)

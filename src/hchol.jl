@@ -17,10 +17,10 @@ mutable struct Tnode
 end
 
 """
-    function to perform low-rank approximation A ~ UV'
+    function to perform low-rank approximation A \approx UV'
     update U and V
 """
-function updateTree!(UV::Tnode, A::SubArray{T, 2}, tol) where T<:AbstractFloat
+function updateTree!(UV::Tnode, A::SubArray{T, 2}, tol::T) where T<:AbstractFloat
     
     n = size(A, 1)
     # kmax denote max rank. better heuristic needed here
@@ -98,7 +98,8 @@ end
 """
 function hchol(A::Matrix{T}, m::Int; tol=convert(T, 1e-8)) where T<: AbstractFloat
     n = size(A, 1)
-    nb = n ÷ m # only for m|n
+    (n % m == 0) || throw(ArgumentError("The condition m|n must be met."))
+    nb = n ÷ m 
     nlev = Int(floor(log2(n/m)))
     if m>n 
         return 1
@@ -130,7 +131,6 @@ end
 
 """
     uncompress()
-    To be Declared
     generates the explicit matrix lower triangular part only
 """
 function uncompress(B::Array{LowerTriangular{T,Array{T,2}},1}, UV::Array{Tnode,1}) where T<: AbstractFloat
@@ -165,6 +165,7 @@ end
 
 """
     hstats()
+    Distance between H-matrix and original matrix
     To be Declared
 """
 function hstats()
@@ -173,6 +174,7 @@ end
 
 """
     permute Tree by block ordering
+    To be Declared
 """
 function permuteTree(UV, order::Vector{Int})
     # uvsize = length(UV)
@@ -182,6 +184,7 @@ end
 """
     inorder()
     compute block order
+    To be Declared
 """
 function inorder()
 
