@@ -15,7 +15,7 @@ using StatsFuns
         - p: estimated probabiliy
         - y: samples
 """
-function mvndns(n::Int, N::Int, L::Matrix{T}, x::Matrix{T}, 
+function mvndns(n::Int, N::Int, L::AbstractMatrix{T}, x::AbstractMatrix{T}, 
     a::Matrix{T}, b::Matrix{T}, tol::T) where T<: AbstractFloat
 
     ALMOSTONE = 1-tol
@@ -32,7 +32,7 @@ function mvndns(n::Int, N::Int, L::Matrix{T}, x::Matrix{T},
             c .+= x[i-1, :] .* dc
             c = map(x -> x > ALMOSTONE ? ALMOSTONE : x, c)
             buf = norminvcdf.(c)
-            y[i-1, :] = buf
+            y[i-1, :] .= buf
             s = L[i,1:i]' * y[1:i, 1:N]
             s = s'
         end
@@ -49,7 +49,7 @@ function mvndns(n::Int, N::Int, L::Matrix{T}, x::Matrix{T},
     c += x[n, :] .* dc
 	c = map(x -> x > ALMOSTONE ? ALMOSTONE : x, c)
 	buf = norminvcdf.(c) 
-	y[n, :] = buf 
+	y[n, :] .= buf 
 
     return (p, y)
 end
@@ -66,7 +66,7 @@ end
         - p_mean: estimated probabiliy
         - p_se: standard error
 """
-function mvn(L::Matrix{T}, a1::Vector{T}, b1::Vector{T}, ns::Int, N::Int; tol = convert(T, 1e-8)) where T<:AbstractFloat
+function mvn(L::AbstractMatrix{T}, a1::Vector{T}, b1::Vector{T}, ns::Int, N::Int; tol = convert(T, 1e-8)) where T<:AbstractFloat
 
     # values produced by the ns samples, each with N randomized qmc points
     values = Vector{T}(undef, ns) 

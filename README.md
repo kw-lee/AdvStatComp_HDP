@@ -1,5 +1,11 @@
 # Hierarchical-block conditioning approximations for high-dimensional multivariate normal probabilities
 
+## Todo
+
+* Fix `LDL()` in `cao2019.jl`
+* Implement `hmvn()` for general $d$
+* Implemnt block ordering
+
 ## Authors
 
 * Hyunseok Yang (@YangHS329)

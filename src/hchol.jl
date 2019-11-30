@@ -144,7 +144,7 @@ function uncompress(B::Array{LowerTriangular{T,Array{T,2}},1}, UV::Array{Tnode,1
     end
 
     for UV_i in UV
-        L[UV_i.i1:UV_i.i1+UV_i.bsz-1, UV_i.j1:UV_i.j1+UV_i.bsz-1] = UV_i.U * UV_i.V'
+        L[UV_i.i1:UV_i.i1+UV_i.bsz-1, UV_i.j1:UV_i.j1+UV_i.bsz-1] .= UV_i.U * UV_i.V'
     end
 
     return(L)

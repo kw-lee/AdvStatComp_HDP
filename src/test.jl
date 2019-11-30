@@ -18,10 +18,10 @@ include("src/mvn.jl")
 dim = 5
 a1 = repeat([-10.0], dim)
 b1 = repeat([0.0], dim)
-ns = 100
+ns = 10
 L = LinearAlgebra.I(dim)
 L = convert(Matrix{Float64}, L)
 N = 100
 tol = 1e-8
-prob, _ = mvn(L, a1, b1, ns, N; tol = tol)
+prob, p_se = mvn(L, a1, b1, ns, N; tol = tol)
 @assert prob ≈ 1/(1<<dim)

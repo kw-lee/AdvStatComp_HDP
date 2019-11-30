@@ -28,3 +28,6 @@ refs/
 
 # ipynb
 *.ipynb_checkpoints
+
+# vscode
+*.code-workspace
