@@ -15,12 +15,12 @@ L = uncompress(B, UV)
 
 # test for mvn
 include("mvn.jl")
-dim = 10
+dim = 8
 a1 = repeat([-10.0], dim)
 b1 = repeat([0.0], dim)
 ns = 10
-# A = rand(Normal(0,1), dim, dim)
-A = convert(Matrix{Float64}, LinearAlgebra.I(dim))
+A = rand(Normal(0,1), dim, dim)
+# A = convert(Matrix{Float64}, LinearAlgebra.I(dim))
 Σ = A*A'
 L = cholesky(Σ).L
 N = 100
@@ -66,3 +66,17 @@ for j in 1:n
     expt_mc[j] = mean(y[j, :])
 end
 expt_mc = L * expt_mc
+
+
+## test for hmvn
+include("hmvn.jl")
+m = 2
+B, UV = hchol(Symmetric(Σ), m)
+
+prob0 = hmvn(B, UV, a1, b1, ns, N; tol = tol, μ = ones(Float64, length(a1)))
+prob1 = mvn(L, a1, b1, ns, N; tol = tol, μ = ones(Float64, length(a1)))
+prob2 = cdf_trunnormal(a1, b1, ones(Float64, length(a1)), Symmetric(Σ))
+
+prob0 = hmvn(B, UV, a1, b1, ns, N; tol = tol, μ = zeros(Float64, length(a1)) .- 2)
+prob1 = mvn(L, a1, b1, ns, N; tol = tol, μ = zeros(Float64, length(a1)) .- 2)
+prob2 = cdf_trunnormal(a1, b1, zeros(Float64, length(a1)) .- 2, Symmetric(Σ))

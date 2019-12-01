@@ -55,16 +55,17 @@ function mvndns(n::Int, N::Int, L::LowerTriangular{T,Array{T,2}}, x::AbstractMat
 end
 
 """
-    mvn(L, a1, b1, v, e, ns, N)
+    mvn(L, a1, b1, v, ns, N; tol = 1e-8, mu = 0)
     input: 
         - L: cholesky factor of the covariance matrix
         - a1: lower bound
         - b1: upper bound
         - ns: The number of sample size
         - N: Randomized QMC points
+        - tol: tolerance
+        - mu: mean
     output:
         - p_mean: estimated probabiliy
-        - p_se: standard error
 """
 function mvn(L::LowerTriangular{T,Array{T,2}}, a1::Vector{T}, b1::Vector{T}, 
     ns::Int, N::Int; tol = convert(T, 1e-8),
@@ -101,7 +102,7 @@ function mvn(L::LowerTriangular{T,Array{T,2}}, a1::Vector{T}, b1::Vector{T},
         end
         X = map(x->abs(2*(x-floor(x))-1), X)
         p, y = mvndns(n, N, L, X, a, b, tol)
-        values[i] = mean(p)
+        values[i] = mean(filter(x -> !isnan(x), p)) # omit nan values
     end
     p_mean = mean(values) # estimated probabiliy
 

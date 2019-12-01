@@ -96,7 +96,7 @@ end
     Build a dense Cholesky decomposition and put it in Hierarchical matrix format
     todo: split size 2 to general integer d (Cao2019)
 """
-function hchol(A::Matrix{T}, m::Int; tol=convert(T, 1e-8)) where T<: AbstractFloat
+function hchol(A::Symmetric{T,Array{T,2}}, m::Int; tol=convert(T, 1e-8)) where T<: AbstractFloat
     n = size(A, 1)
     (n % m == 0) || throw(ArgumentError("The condition m|n must be met."))
     nb = n ÷ m 
