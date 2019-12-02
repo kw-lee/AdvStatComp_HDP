@@ -76,7 +76,7 @@ end
     build Tree
     input: n, nlev
     output: Array{Tnode}
-    todo: split size 2 to general integer d (Cao2019)
+    todo: split size 2 to general integer d (Cao2019), we should change << operator
 """
 function buildTree(T::Type, n::Int, nlev::Int)
     tree = Array{Tnode}(undef, (1<<nlev) - 1)
@@ -100,7 +100,7 @@ function hchol(A::Symmetric{T,Array{T,2}}, m::Int; tol=convert(T, 1e-8)) where T
     n = size(A, 1)
     (n % m == 0) || throw(ArgumentError("The condition m|n must be met."))
     nb = n ÷ m 
-    nlev = Int(floor(log2(n/m)))
+    nlev = Int(floor(log2(n/m))) # log2 will be changed to logd?
     if m>n 
         return 1
     end
@@ -118,14 +118,16 @@ function hchol(A::Symmetric{T,Array{T,2}}, m::Int; tol=convert(T, 1e-8)) where T
         UV = buildTree(T, n, nlev)
         # ordering
         # UV = permuteTree(UV, order)
-    end
 
-    # update built tree
-    for UV_i in UV
-        L_i = view(L, UV_i.i1:UV_i.i1+UV_i.bsz-1, UV_i.j1:UV_i.j1+UV_i.bsz-1)
-        updateTree!(UV_i, L_i, tol)
+            # update built tree
+        for UV_i in UV
+            L_i = view(L, UV_i.i1:UV_i.i1+UV_i.bsz-1, UV_i.j1:UV_i.j1+UV_i.bsz-1)
+            updateTree!(UV_i, L_i, tol)
+        end
+    else 
+        UV = Array{Tnode}(undef, 0)
     end
-
+    
     return (B, UV)
 end
 

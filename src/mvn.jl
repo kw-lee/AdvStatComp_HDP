@@ -5,6 +5,7 @@ using StatsFuns
 
 """
     mvndns(n, N, L, x, a, b; tol)
+    function to sample truncated normal probabilities
     input:
         - n: dimension
         - N: Randomized QMC points
@@ -12,8 +13,8 @@ using StatsFuns
         - a: lower bound
         - b: upper bound
     output:
-        - p: estimated probabiliy
-        - y: samples, Ly ~ truncated_normal(0, LL'; a, b)
+        - p: sampled probabiliy
+        - ~~y: samples, Ly ~ truncated_normal(0, LL'; a, b)~~
 """
 function mvndns(n::Int, N::Int, L::LowerTriangular{T,Array{T,2}}, x::AbstractMatrix{T}, 
     a::Matrix{T}, b::Matrix{T}, tol::T) where T<: AbstractFloat
@@ -33,8 +34,7 @@ function mvndns(n::Int, N::Int, L::LowerTriangular{T,Array{T,2}}, x::AbstractMat
             c = map(x -> x > ALMOSTONE ? ALMOSTONE : x, c)
             buf = norminvcdf.(c)
             y[i-1, :] .= buf
-            s = L[i,1:i]' * y[1:i, 1:N]
-            s = s'
+            s = y[1:i, 1:N]' * L[1:i,i]
         end
         ct = L[i, i]
         ai = a[i, :] .- s
@@ -46,20 +46,24 @@ function mvndns(n::Int, N::Int, L::LowerTriangular{T,Array{T,2}}, x::AbstractMat
         dc = d - c
         p = p .* dc
     end
-    c += x[n, :] .* dc
-	c = map(x -> x > ALMOSTONE ? ALMOSTONE : x, c)
-	buf = norminvcdf.(c) 
-	y[n, :] .= buf 
+    # c += x[n, :] .* dc
+	# c = map(x -> x > ALMOSTONE ? ALMOSTONE : x, c)
+	# buf = norminvcdf.(c) 
+	# y[n, :] .= buf 
 
-    return (p, y)
+    # return (p, y)
+    return p
 end
 
 """
-    mvn(L, a1, b1, v, ns, N; tol = 1e-8, mu = 0)
+    mvn(L, a, b, ns, N; tol = 1e-8, mu = 0)
+    function to calculate normal probability P(a < x < b) where x ~ N(mu, LL^T) using 
+        the method of Genz (1992), which relies on randomized quasi-Monte Carlo Richtmyer generators and tends 
+        to produce results that converge substantially faster than Monte Carlo points.
     input: 
         - L: cholesky factor of the covariance matrix
-        - a1: lower bound
-        - b1: upper bound
+        - a: lower bound
+        - b: upper bound
         - ns: The number of sample size
         - N: Randomized QMC points
         - tol: tolerance
@@ -67,10 +71,12 @@ end
     output:
         - p_mean: estimated probabiliy
 """
-function mvn(L::LowerTriangular{T,Array{T,2}}, a1::Vector{T}, b1::Vector{T}, 
+function mvn(L::LowerTriangular{T,Array{T,2}}, a::AbstractArray{T, 1}, b::AbstractArray{T, 1}, 
     ns::Int, N::Int; tol = convert(T, 1e-8),
-    μ::Array{T,1} = zeros(T, length(a1))) where T<:AbstractFloat
+    μ::Array{T,1} = zeros(T, length(a))) where T<:AbstractFloat
 
+    a1 = copy(a)
+    b1 = copy(b)
     a1 -= μ # centering
     b1 -= μ # centering
 
@@ -101,10 +107,46 @@ function mvn(L::LowerTriangular{T,Array{T,2}}, a1::Vector{T}, b1::Vector{T},
             X[:,j] = q * (1+j) + xr
         end
         X = map(x->abs(2*(x-floor(x))-1), X)
-        p, y = mvndns(n, N, L, X, a, b, tol)
+        p = mvndns(n, N, L, X, a, b, tol)
         values[i] = mean(filter(x -> !isnan(x), p)) # omit nan values
     end
     p_mean = mean(values) # estimated probabiliy
 
     return p_mean
+end
+
+"""
+    expt_trnom(a, b, L; ns = 10, N = 1000, tol = 1e-8, mu = 0)
+    function to calculate expectation of the sample from the truncated normal random variable
+    input: 
+        - L: cholesky factor of the covariance matrix
+        - a: lower bound
+        - b: upper bound
+        - ns: The number of sample size
+        - N: Randomized QMC points
+        - tol: tolerance
+        - mu: mean
+    output:
+        - expectation
+"""
+function expt_tnorm(a::AbstractArray{T,1}, b::AbstractArray{T,1}, L::LowerTriangular{T,Array{T,2}};
+    ns = 10, N = 1000, tol = convert(T, 1e-8), μ::Array{T,1} = zeros(T, length(a))) where T<:AbstractFloat
+
+    d = length(a)
+    c = zeros(d)
+    Σ = L * transpose(L)
+
+    for l in 1:d
+        μ1 = copy(μ[1:d .!= l] + Σ[1:d .!= l, l] * (a[l] - μ[l]) / Σ[l, l])
+        μ2 = copy(μ[1:d .!= l] + Σ[1:d .!= l, l] * (b[l] - μ[l]) / Σ[l, l])
+        Σl = copy(Symmetric(Σ[1:d .!= l, 1:d .!= l] - Σ[l, 1:d .!= l] * transpose(Σ[1:d .!= l, l]) / Σ[l, l]))
+        Ll = cholesky(Σl).L
+        c[l] = pdf(Normal(μ[l], sqrt(Σ[l, l])), a[l]) * 
+            mvn(Ll, a[1:d .!= l], b[1:d .!= l], ns, N, tol = tol, μ = μ1) - 
+            pdf(Normal(0, sqrt(Σ[l, l])), b[l]) * 
+            mvn(Ll, a[1:d .!= l], b[1:d .!= l], ns, N, tol = tol, μ = μ2)
+    end
+
+    # Note (e_1, \cdots, e_d) = I_d
+    return (μ + Σ * c / mvn(L, a, b, ns, N, tol = tol))
 end

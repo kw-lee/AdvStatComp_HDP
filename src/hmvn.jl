@@ -2,9 +2,10 @@ include("hchol.jl")
 include("mvn.jl")
 
 """
-    hmvn(B, UV, a1, b1, ns, N; tol = 1e-8, mu = 0)
+    hmvn(Sigma, m, a1, b1, ns, N; tol = 1e-8, mu = 0)
     input: 
-        - B, UV: h_cholesky factor of the covariance matrix
+        - Sigma: covariance matrix
+        - m: block size
         - a1: lower bound
         - b1: upper bound
         - ns: The number of sample size
@@ -14,76 +15,50 @@ include("mvn.jl")
     output:
         - p_mean: estimated probabiliy
 """
-function hmvn(B::Array{LowerTriangular{T,Array{T,2}},1}, 
-    UV::Array{Tnode,1}, a1::Vector{T}, b1::Vector{T}, 
+function hmvn(Σ::Symmetric{T,Array{T,2}}, m::Int, a1::AbstractArray{T, 1}, b1::AbstractArray{T, 1}, 
     ns::Int, N::Int; tol = convert(T, 1e-8),
     μ::Array{T,1} = zeros(T, length(a1))) where T<:AbstractFloat
 
-    a1 -= μ # centering
-    b1 -= μ # centering
+    n = size(Σ, 1) # total size
+    (n % m == 0) || throw(ArgumentError("The condition m|n must be met."))
+    (n >= m) || throw(ArgumentError("The condition n >= m must be met."))
 
-    nb = length(B) # the number of blocks
-    m = size(B[1], 1) # block size
-    n = nb * m # total size of
-
-    # values produced by the ns samples, each with N randomized qmc points
-    values = Vector{T}(undef, ns) 
-
-    # get prime numbers
-    if n == 1
-        prime_n = 2
-    elseif n == 2
-        prime_n = [2, 3]
+    a = copy(a1)
+    b = copy(b1)
+    a -= μ # centering
+    b -= μ # centering
+    
+    if (n == m)
+        L = cholesky(Σ).L
+        return mvn(L, a, b, ns, N, tol = tol)
     else
-        prime_n = Primes.primes(Int(floor(5*n*log(n+1)/4)))
-    end
+        B, UV = hchol(Σ, m)
+        nb = length(B) # the number of blocks, r in Cao2019
+        x = zeros(T, n) # record expectations
+        log_P = 0.0
 
-    q = Vector{T}(undef, n)
-    for i in 1:n
-        q[i] = sqrt(prime_n[i])
-    end
-
-    vp = Matrix{T}(undef, nb, N)
-    y = Matrix{T}(undef, nb*m, N)
-
-    for i in 1:ns
-        xr = rand(T, m, 1) # xr ~ U(0,1)
-        a = reshape(repeat(a1, N), n, N)
-        b = reshape(repeat(b1, N), n, N)
-
-        for r in 1:nb
-            r1 = (r-1)*m
-            if r > 1
-                i1 = UV[r-1].i1
-                j1 = UV[r-1].j1
-                bsz = UV[r-1].bsz
-                delta = zeros(T, bsz, N) # g in Cao2019
-                if UV[r-1].rank != 0
-                    delta .= UV[r-1].U * ( transpose(UV[r-1].V) * y[j1+1:j1+bsz,1:N] )
+        for i in 1:nb
+            j = (i-1) * m
+            if i>1
+                i1 = UV[i-1].i1
+                j1 = UV[i-1].j1
+                bsz = UV[i-1].bsz
+                delta = zeros(T, bsz) # g in Cao2019
+                if UV[i-1].rank != 0
+                    delta[1:bsz] .= UV[i-1].U * (transpose(UV[i-1].V) * x[j1:j1+bsz-1] )
                 end
-                a[i1:i1+bsz-1, 1:N] -= delta 
-                b[i1:i1+bsz-1, 1:N] -= delta 
+                a[i1:i1+bsz-1] -= delta 
+                b[i1:i1+bsz-1] -= delta 
             end
-            X = Matrix{T}(undef, m, N)
-            for j in 1:N
-                X[:,j] = view(q, r1+1:r1+m) * (1+j) + xr
-            end
-            X = map(x->abs(2*(x-floor(x))-1), X)
-            pr, yr = mvndns(m, N, B[r], X, a[r1+1:r1+m,1:N], b[r1+1:r1+m, 1:N], tol)
-
-            vp[r, :] .= pr
-            # yr is an monte-carlo approximator of the solve(B, expt{x})
-            # expt{x} can be calcultaed by 
-            y[r1+1:r1+m, 1:N] .= yr 
+            ai = a[j+1:j+m]
+            bi = b[j+1:j+m]
+            pi = mvn(B[i], ai, bi, ns, N, tol = tol)
+            xi = expt_tnorm(ai, bi, B[i], ns = ns, N = N)
+            log_P += log(pi) # for numerical stability
+            x[j+1:j+m] .= B[i] \ xi
         end
 
-        p = Vector{T}(undef, N)
-        for j in 1:N
-            p[j] = prod(filter(x -> !isnan(x), vp[1:nb, j])) # omit nan values
-        end
-        values[i] = mean(p)
+        return exp(log_P)
     end
-
-    p_mean = mean(values) # estimated probabiliy
-    return p_mean
+    
 end

@@ -48,7 +48,7 @@ function CMVN(Σ::Symmetric{Float64,Array{Float64,2}}, a::Array{Float64,1}, b::A
         # y[(j + 1):(j + d)] .= ex_trunnormal(a1, b1, zeros(d), copy(Symmetric(D1)))
         # use ns=10 and N=1000 which is same in Genton2018
         p_i = mvn(L1, a1, b1, ns, N)
-        y_i = exp_truncnormal(a1, b1, Symmetric(D1); ns = ns, N = N)
+        y_i = expt_tnorm(a1, b1, L1; ns = ns, N = N)
 
         P *= p_i
         y[(j + 1):(j + d)] .= y_i
