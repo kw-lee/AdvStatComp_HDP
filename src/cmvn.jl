@@ -16,7 +16,7 @@ include("mvn.jl")
         - L: LowerTriangular
         - D: array{Matrix}
 """
-function LDL(A::Symmetric{T,Array{T,2}}, d::Int; m::Int = size(Σ, 1)) where T<:AbstractFloat
+function LDL(A::Symmetric{T,Array{T,2}}, d::Int; m::Int = size(A, 1)) where T<:AbstractFloat
     # m is multiple of d
     if m % d == 0
         Σ = Matrix(A)

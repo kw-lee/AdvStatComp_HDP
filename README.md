@@ -2,7 +2,7 @@
 
 ## Todo
 
-* **Fix `LDL()` in `cao2019.jl`**
+* Fix `NaN` issue in `CMVN()` simulation (Sec3-test.ipynb)
 * Test `HCMVN()` for simulation
 * Impelent `HRCMVN()` for simulation
 * Implemnt block ordering

@@ -1,12 +1,12 @@
 using LinearAlgebra
 using Distributions
 
-# cd("./src")
+cd("./src")
 
 include("hchol.jl")
 include("mvn.jl")
 include("truncnorm.jl")
-include("hmvn.jl")
+include("hcmvn.jl")
 
 # test for hchol
 A = rand(Normal(0,1), 8, 8)
