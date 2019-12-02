@@ -2,8 +2,9 @@
 
 ## Todo
 
-* Fix `LDL()` in `cao2019.jl`
-* Implement `HCMVN()` for general $d$
+* **Fix `LDL()` in `cao2019.jl`**
+* Test `HCMVN()` for simulation
+* Impelent `HRCMVN()` for simulation
 * Implemnt block ordering
 
 ## Authors

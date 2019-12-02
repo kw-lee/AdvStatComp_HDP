@@ -56,7 +56,7 @@ function mvndns(n::Int, N::Int, L::LowerTriangular{T,Array{T,2}}, x::AbstractMat
 end
 
 """
-    mvn(L, a, b, ns, N; tol = 1e-8, mu = 0)
+    mvn(L, a, b; ns = 10, N = 1000, tol = 1e-8, mu = 0)
     function to calculate normal probability P(a < x < b) where x ~ N(mu, LL^T) using 
         the method of Genz (1992), which relies on randomized quasi-Monte Carlo Richtmyer generators and tends 
         to produce results that converge substantially faster than Monte Carlo points.
@@ -64,15 +64,15 @@ end
         - L: cholesky factor of the covariance matrix
         - a: lower bound
         - b: upper bound
-        - ns: The number of sample size
-        - N: Randomized QMC points
-        - tol: tolerance
-        - mu: mean
+        - ns: The number of sample size (defalut=10)
+        - N: Randomized QMC points (defalt=1000)
+        - tol: tolerance (defalt=1e-8)
+        - mu: mean (default=0)
     output:
         - p_mean: estimated probabiliy
 """
-function mvn(L::LowerTriangular{T,Array{T,2}}, a::AbstractArray{T, 1}, b::AbstractArray{T, 1}, 
-    ns::Int, N::Int; tol = convert(T, 1e-8),
+function mvn(L::LowerTriangular{T,Array{T,2}}, a::AbstractArray{T, 1}, b::AbstractArray{T, 1};
+    ns::Int = 10, N::Int = 1000, tol = convert(T, 1e-8),
     μ::Array{T,1} = zeros(T, length(a))) where T<:AbstractFloat
 
     a1 = copy(a)
@@ -122,16 +122,16 @@ end
         - L: cholesky factor of the covariance matrix
         - a: lower bound
         - b: upper bound
-        - ns: The number of sample size
-        - N: Randomized QMC points
-        - tol: tolerance
-        - mu: mean
+        - ns: The number of sample size (defalut=10)
+        - N: Randomized QMC points (defalt=1000)
+        - tol: tolerance (defalt=1e-8)
+        - mu: mean (default=0)
     output:
         - expectation
 """
 function expt_tnorm(a::AbstractArray{T,1}, b::AbstractArray{T,1}, L::LowerTriangular{T,Array{T,2}};
-    ns = 10, N = 1000, tol = convert(T, 1e-8), μ::Array{T,1} = zeros(T, length(a)),
-    mvnengine = mvn) where T<:AbstractFloat
+    ns::Int = 10, N::Int = 1000, tol = convert(T, 1e-8), 
+    μ::Array{T,1} = zeros(T, length(a))) where T<:AbstractFloat
 
     d = length(a)
     c = zeros(d)
@@ -143,11 +143,11 @@ function expt_tnorm(a::AbstractArray{T,1}, b::AbstractArray{T,1}, L::LowerTriang
         Σl = copy(Symmetric(Σ[1:d .!= l, 1:d .!= l] - Σ[l, 1:d .!= l] * transpose(Σ[1:d .!= l, l]) / Σ[l, l]))
         Ll = cholesky(Σl).L
         c[l] = pdf(Normal(μ[l], sqrt(Σ[l, l])), a[l]) * 
-            mvnengine(Ll, a[1:d .!= l], b[1:d .!= l], ns, N, tol = tol, μ = μ1) - 
+            mvn(Ll, a[1:d .!= l], b[1:d .!= l], ns = ns, N = N, tol = tol, μ = μ1) - 
             pdf(Normal(0, sqrt(Σ[l, l])), b[l]) * 
-            mvnengine(Ll, a[1:d .!= l], b[1:d .!= l], ns, N, tol = tol, μ = μ2)
+            mvn(Ll, a[1:d .!= l], b[1:d .!= l], ns = ns, N = N, tol = tol, μ = μ2)
     end
 
     # Note (e_1, \cdots, e_d) = I_d
-    return (μ + Σ * c / mvnengine(L, a, b, ns, N, tol = tol))
+    return (μ + Σ * c / mvn(L, a, b, ns = ns, N = N, tol = tol))
 end

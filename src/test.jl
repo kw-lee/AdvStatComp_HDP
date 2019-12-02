@@ -6,7 +6,7 @@ using Distributions
 include("hchol.jl")
 include("mvn.jl")
 include("truncnorm.jl")
-include("hcmvn.jl")
+include("hmvn.jl")
 
 # test for hchol
 A = rand(Normal(0,1), 8, 8)
@@ -40,10 +40,10 @@ expt_tnorm([-1.0, -1.0, -1.0], [1.0, 1.0, 1.0], LowerTriangular([1.0 0 0 ; 0 1.0
 
 ### test for probs
 prob0 = HCMVN(Symmetric(Σ), m, a1, b1, ns, N; tol = tol, μ = ones(Float64, length(a1)))
-prob1 = mvn(L, a1, b1, ns, N; tol = tol, μ = ones(Float64, length(a1)))
+prob1 = mvn(L, a1, b1, ns = ns, N = N, tol = tol, μ = ones(Float64, length(a1)))
 prob2 = cdf_trunnormal(a1, b1, ones(Float64, length(a1)), Symmetric(Σ))
 prob0 = HCMVN(Symmetric(Σ), m, a1, b1, ns, N; tol = tol, μ = b1)
-prob1 = mvn(L, a1, b1, ns, N; tol = tol, μ = b1)
+prob1 = mvn(L, a1, b1, ns = ns, N = N, tol = tol, μ = b1)
 prob2 = cdf_trunnormal(a1, b1, zeros(Float64, length(a1)), Symmetric(Σ))
 
 ## 2. Sigma = AA', A_ij ~iid N(0,1)
@@ -53,10 +53,10 @@ L = cholesky(Σ).L
 N = 1000
 tol = 1e-8
 
-prob0 = HCMVN(Symmetric(Σ), m, a1, b1, ns, N; tol = tol, μ = b1 .- 5)
-prob1 = mvn(L, a1, b1, ns, N; tol = tol, μ = b1 .- 5)
+prob0 = HMVN(a1, b1, Symmetric(Σ), m, ns = ns, N = N, tol = tol, μ = b1 .- 5)
+prob1 = mvn(L, a1, b1, ns = ns, N = N, tol = tol, μ = b1 .- 5)
 prob2 = cdf_trunnormal(a1, b1, b1 .- 5, Symmetric(Σ))
 
-prob0 = HCMVN(Symmetric(Σ), m, a1, b1, ns, N; tol = tol, μ = ones(Float64, length(a1)))
-prob1 = mvn(L, a1, b1, ns, N; tol = tol, μ = ones(Float64, length(a1)))
+prob0 = HMVN(a1, b1, Symmetric(Σ), m, ns = ns, N = N, tol = tol, μ = ones(Float64, length(a1)))
+prob1 = mvn(L, a1, b1, ns = ns, N = N, tol = tol, μ = ones(Float64, length(a1)))
 prob2 = cdf_trunnormal(a1, b1, ones(Float64, length(a1)), Symmetric(Σ))
