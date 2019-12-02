@@ -2,7 +2,7 @@ include("hchol.jl")
 include("mvn.jl")
 
 """
-    hmvn(Sigma, m, a1, b1, ns, N; tol = 1e-8, mu = 0)
+    HCMVN(Sigma, m, a1, b1, ns, N; tol = 1e-8, mu = 0)
     input: 
         - Sigma: covariance matrix
         - m: block size
@@ -15,9 +15,10 @@ include("mvn.jl")
     output:
         - p_mean: estimated probabiliy
 """
-function hmvn(Σ::Symmetric{T,Array{T,2}}, m::Int, a1::AbstractArray{T, 1}, b1::AbstractArray{T, 1}, 
+function HCMVN(Σ::Symmetric{T,Array{T,2}}, m::Int, a1::AbstractArray{T, 1}, b1::AbstractArray{T, 1}, 
     ns::Int, N::Int; tol = convert(T, 1e-8),
-    μ::Array{T,1} = zeros(T, length(a1))) where T<:AbstractFloat
+    μ::Array{T,1} = zeros(T, length(a1)),
+    mvnengine = mvn) where T<:AbstractFloat
 
     n = size(Σ, 1) # total size
     (n % m == 0) || throw(ArgumentError("The condition m|n must be met."))
@@ -52,8 +53,8 @@ function hmvn(Σ::Symmetric{T,Array{T,2}}, m::Int, a1::AbstractArray{T, 1}, b1::
             end
             ai = a[j+1:j+m]
             bi = b[j+1:j+m]
-            pi = mvn(B[i], ai, bi, ns, N, tol = tol)
-            xi = expt_tnorm(ai, bi, B[i], ns = ns, N = N)
+            pi = mvnengine(B[i], ai, bi, ns, N, tol = tol)
+            xi = expt_tnorm(ai, bi, B[i], ns = ns, N = N, mvnengine = mvn)
             log_P += log(pi) # for numerical stability
             x[j+1:j+m] .= B[i] \ xi
         end

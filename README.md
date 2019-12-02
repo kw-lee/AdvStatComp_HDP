@@ -3,7 +3,7 @@
 ## Todo
 
 * Fix `LDL()` in `cao2019.jl`
-* Implement `hmvn()` for general $d$
+* Implement `HCMVN()` for general $d$
 * Implemnt block ordering
 
 ## Authors

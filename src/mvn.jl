@@ -130,7 +130,8 @@ end
         - expectation
 """
 function expt_tnorm(a::AbstractArray{T,1}, b::AbstractArray{T,1}, L::LowerTriangular{T,Array{T,2}};
-    ns = 10, N = 1000, tol = convert(T, 1e-8), μ::Array{T,1} = zeros(T, length(a))) where T<:AbstractFloat
+    ns = 10, N = 1000, tol = convert(T, 1e-8), μ::Array{T,1} = zeros(T, length(a)),
+    mvnengine = mvn) where T<:AbstractFloat
 
     d = length(a)
     c = zeros(d)
@@ -142,11 +143,11 @@ function expt_tnorm(a::AbstractArray{T,1}, b::AbstractArray{T,1}, L::LowerTriang
         Σl = copy(Symmetric(Σ[1:d .!= l, 1:d .!= l] - Σ[l, 1:d .!= l] * transpose(Σ[1:d .!= l, l]) / Σ[l, l]))
         Ll = cholesky(Σl).L
         c[l] = pdf(Normal(μ[l], sqrt(Σ[l, l])), a[l]) * 
-            mvn(Ll, a[1:d .!= l], b[1:d .!= l], ns, N, tol = tol, μ = μ1) - 
+            mvnengine(Ll, a[1:d .!= l], b[1:d .!= l], ns, N, tol = tol, μ = μ1) - 
             pdf(Normal(0, sqrt(Σ[l, l])), b[l]) * 
-            mvn(Ll, a[1:d .!= l], b[1:d .!= l], ns, N, tol = tol, μ = μ2)
+            mvnengine(Ll, a[1:d .!= l], b[1:d .!= l], ns, N, tol = tol, μ = μ2)
     end
 
     # Note (e_1, \cdots, e_d) = I_d
-    return (μ + Σ * c / mvn(L, a, b, ns, N, tol = tol))
+    return (μ + Σ * c / mvnengine(L, a, b, ns, N, tol = tol))
 end
