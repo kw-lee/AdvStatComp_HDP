@@ -73,3 +73,4 @@ This project has a five-point plan:
 [^Genton2018]: Genton, M. G., Keyes, D. E., & Turkiyyah, G. (2018). Hierarchical decompositions for the computation of high-dimensional multivariate normal probabilities. Journal of Computational and Graphical Statistics, 27(2), 268-277.
 [^Trinh2015]: Trinh, G., & Genz, A. (2015). Bivariate conditioning approximations for multivariate normal probabilities. Statistics and Computing, 25(5), 989-996.
 [^Hackbusch2015]: Hackbusch, W. (2015). Hierarchical matrices: algorithms and analysis (Vol. 49). Heidelberg: Springer.
+[^Walker2018]: Walker, D.W. (2018). Morton ordering of 2D arrays for efficient access to hierarchical memory. The International Journal of High Performance Computing Application, 32(1), 189-203.
