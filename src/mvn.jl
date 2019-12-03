@@ -20,27 +20,39 @@ function mvndns(n::Int, N::Int, L::LowerTriangular{T,Array{T,2}}, x::AbstractMat
     a::Matrix{T}, b::Matrix{T}, tol::T) where T<: AbstractFloat
 
     ALMOSTONE = 1-tol
-    c = Vector{T}(undef, N)
-    d = Vector{T}(undef, N)
-    dc = Vector{T}(undef, N)
+    # c = Vector{T}(undef, N)
+    # d = Vector{T}(undef, N)
+    # dc = Vector{T}(undef, N)
 
     y = zeros(T, n, N)
     log_p = zeros(T, N) # numerical stability
-	s = zeros(T, N)
+    s = zeros(T, N)
 
     for i in 1:n 
-        if i>1
+        if i > 1
             c .+= x[i-1, :] .* dc
             c = map(x -> x > ALMOSTONE ? ALMOSTONE : x, c)
             buf = norminvcdf.(c)
             y[i-1, :] .= buf
-            s = y[1:i, 1:N]' * L[1:i,i]
+            s = y[1:i-1, 1:N]' * L[1:i-1,i]
         end
+
         ct = L[i, i]
-        ai = a[i, :] .- s
-        ai ./= ct
-        bi = b[i, :] .- s
-        bi ./= ct
+        ai = fill(convert(T, -Inf), N)
+        bi = fill(convert(T, Inf), N)
+
+        for j in 1:N
+            if a[i,j] != -Inf
+                ai[j] = a[i,j] - s[j]
+                ai[j] /= ct
+            end
+    
+            if b[i,j] != Inf
+                bi[j] = b[i,j] - s[j]
+                bi[j] /= ct
+            end
+        end
+        
         c = normcdf.(ai)
         d = normcdf.(bi)
         dc = d - c
@@ -77,8 +89,9 @@ function mvn(L::LowerTriangular{T,Array{T,2}}, a::AbstractArray{T, 1}, b::Abstra
 
     a1 = copy(a)
     b1 = copy(b)
+    n = size(L, 1)
 
-    for i in 1:length(a)
+    for i in 1:n
         if a1[i] != -Inf
             a1[i] = a1[i] - μ[i]
         end
@@ -88,16 +101,14 @@ function mvn(L::LowerTriangular{T,Array{T,2}}, a::AbstractArray{T, 1}, b::Abstra
         end
     end
 
-    n = size(L, 1)
-
     if n == 1
         return normcdf.(b1)[1] - normcdf.(a1)[1]
     else
         # values produced by the ns samples, each with N randomized qmc points
         values = Vector{T}(undef, ns) 
         X = Matrix{T}(undef, n, N)
-        a = reshape(repeat(a1, N), n, N)
-        b = reshape(repeat(b1, N), n, N)
+        ax = reshape(repeat(a1, N), n, N)
+        bx = reshape(repeat(b1, N), n, N)
     
         # get prime numbers
         if n == 2
@@ -117,7 +128,7 @@ function mvn(L::LowerTriangular{T,Array{T,2}}, a::AbstractArray{T, 1}, b::Abstra
                 X[:,j] = q * (1+j) + xr
             end
             X = map(x->abs(2*(x-floor(x))-1), X)
-            p = mvndns(n, N, L, X, a, b, tol)
+            p = mvndns(n, N, L, X, ax, bx, tol)
             values[i] = mean(filter(x -> !isnan(x), p)) # omit nan values
         end
         p_mean = mean(values) # estimated probabiliy
@@ -147,6 +158,7 @@ function expt_tnorm(a::AbstractArray{T,1}, b::AbstractArray{T,1}, L::LowerTriang
     d = length(a)
 
     if d == 1
+        # see https://en.wikipedia.org/wiki/Truncated_normal_distribution
         α = (a[1] - μ[1]) / L[1,1]
         β = (b[1] - μ[1]) / L[1,1]
         return (μ[1] + L[1,1] * (normpdf(α) - normpdf(β))/(normcdf(β) - normcdf(α)))
