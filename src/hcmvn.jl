@@ -122,9 +122,8 @@ function HCMVN(a1::AbstractArray{T, 1}, b1::AbstractArray{T, 1},
             bi = b[j+1:j+m]
             Σi = Symmetric(B[i] * B[i]')          
             pi, yi = CMVN(Σi, ai, bi, d, ns = ns, N = N, tol = tol)
-            xi = Cexpt_tnorm(ai, bi, Σi, d, ns = ns, N = N, tol = tol)
             log_P += log(pi) # for numerical stability
-            x[j+1:j+m] .= B[i] \ xi
+            x[j+1:j+m] .= B[i] \ yi
         end
 
         return exp(log_P)

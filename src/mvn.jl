@@ -149,15 +149,15 @@ function mvn(L::LowerTriangular{T,Array{T,2}}, a::AbstractArray{T, 1}, b::Abstra
         
                 ct = L[i, i]
 
-                if a[i] != -Inf
-                    ai = a[i] .- s
+                if a1[i] != -Inf
+                    ai = a1[i] .- s
                     ai ./= ct
                 else 
                     ai = fill(convert(T, -Inf), N)
                 end
 
-                if b[i] != Inf
-                    bi = b[i] .- s
+                if b1[i] != Inf
+                    bi = b1[i] .- s
                     bi ./= ct
                 else 
                     bi = fill(convert(T, Inf), N)
