@@ -86,6 +86,10 @@ using StatsFuns
 function mvn(L::LowerTriangular{T,Array{T,2}}, a::AbstractArray{T, 1}, b::AbstractArray{T, 1};
     ns::Int = 10, N::Int = 1000, tol = convert(T, 1e-8),
     μ::Array{T,1} = zeros(T, length(a))) where T<:AbstractFloat
+    
+    if(sum(isinf.(μ)) > 0)
+        return 0
+    end
 
     a1 = copy(a)
     b1 = copy(b)
@@ -170,8 +174,12 @@ function mvn(L::LowerTriangular{T,Array{T,2}}, a::AbstractArray{T, 1}, b::Abstra
             end
 
             p = exp.(log_p)
-
-            values[i] = mean(filter(x -> !isnan(x), p)) # omit nan values
+            
+            if(length(filter(x -> !isnan(x), p)) == 0)
+                values[i] = 0
+            else
+                values[i] = mean(filter(x -> !isnan(x), p)) # omit nan values
+            end
         end
         p_mean = mean(values) # estimated probabiliy
 
@@ -198,7 +206,6 @@ function expt_tnorm(a::AbstractArray{T,1}, b::AbstractArray{T,1}, L::LowerTriang
     μ::Array{T,1} = zeros(T, length(a))) where T<:AbstractFloat
 
     d = length(a)
-
     if d == 1
         # see https://en.wikipedia.org/wiki/Truncated_normal_distribution
         α = (a[1] - μ[1]) / L[1,1]
@@ -210,14 +217,22 @@ function expt_tnorm(a::AbstractArray{T,1}, b::AbstractArray{T,1}, L::LowerTriang
         for l in 1:d
             μ1 = copy(μ[1:d .!= l] + Σ[1:d .!= l, l] * (a[l] - μ[l]) / Σ[l, l])
             μ2 = copy(μ[1:d .!= l] + Σ[1:d .!= l, l] * (b[l] - μ[l]) / Σ[l, l])
-            Σl = copy(Symmetric(Σ[1:d .!= l, 1:d .!= l] - Σ[l, 1:d .!= l] * transpose(Σ[1:d .!= l, l]) / Σ[l, l]))
+            Σl = copy(Symmetric(Σ[1:d .!= l, 1:d .!= l] - Σ[1:d .!= l, l] * transpose(Σ[l, 1:d .!= l]) / Σ[l, l]))
+            
             Ll = cholesky(Σl).L
             c[l] = pdf(Normal(μ[l], sqrt(Σ[l, l])), a[l]) * 
                 mvn(Ll, a[1:d .!= l], b[1:d .!= l], ns = ns, N = N, tol = tol, μ = μ1) - 
-                pdf(Normal(0, sqrt(Σ[l, l])), b[l]) * 
+                pdf(Normal(μ[l], sqrt(Σ[l, l])), b[l]) * 
                 mvn(Ll, a[1:d .!= l], b[1:d .!= l], ns = ns, N = N, tol = tol, μ = μ2)
+            
+            #println(Ll)
+            #println(a[1:d .!= l])
+            #println(b[1:d .!= l])
+            #println(μ2)
+            #println(mvn(Ll, a[1:d .!= l], b[1:d .!= l], ns = ns, N = N, tol = tol, μ = μ2))
+            
         end
-
+        #println(mvn(L, a, b, ns = ns, N = N, tol = tol))
         # Note (e_1, \cdots, e_d) = I_d
         return (μ + Σ * c / mvn(L, a, b, ns = ns, N = N, tol = tol))
     end

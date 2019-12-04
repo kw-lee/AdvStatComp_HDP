@@ -49,7 +49,7 @@ function updateTree!(UV::Tnode, A::SubArray{T, 2}, tol::T) where T<:AbstractFloa
     end
 
     if (rank>1)&(rank==kmax) 
-        println("Warning: max rank reached")
+        #println("Warning: max rank reached")
     end
 
     s2 = sqrt.(s[1:rank])
