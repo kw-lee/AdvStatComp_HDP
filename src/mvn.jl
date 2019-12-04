@@ -3,80 +3,80 @@ using Statistics
 using Distributions
 using StatsFuns
 
-"""
-    mvndns(n, N, L, x, a, b; tol)
-    function to sample truncated normal probabilities
-    input:
-        - n: dimension
-        - N: Randomized QMC points
-        - L: cholesky factor of the covariance matrix
-        - a: lower bound
-        - b: upper bound
-    output:
-        - p: sampled probabilies
-        - ~~y: samples, Ly ~ truncated_normal(0, LL'; a, b)~~
-"""
-function mvndns(n::Int, N::Int, L::LowerTriangular{T,Array{T,2}}, x::AbstractMatrix{T}, 
-    a::Matrix{T}, b::Matrix{T}, tol::T) where T<: AbstractFloat
+# """
+#     mvndns(n, N, L, x, a, b; tol)
+#     function to sample truncated normal probabilities
+#     input:
+#         - n: dimension
+#         - N: Randomized QMC points
+#         - L: cholesky factor of the covariance matrix
+#         - a: lower bound
+#         - b: upper bound
+#     output:
+#         - p: sampled probabilies
+#         - ~~y: samples, Ly ~ truncated_normal(0, LL'; a, b)~~
+# """
+# function mvndns(n::Int, N::Int, L::LowerTriangular{T,Array{T,2}}, x::AbstractMatrix{T}, 
+#     a::Matrix{T}, b::Matrix{T}, tol::T) where T<: AbstractFloat
 
-    ALMOSTONE = 1-tol
-    # c = Vector{T}(undef, N)
-    # d = Vector{T}(undef, N)
-    # dc = Vector{T}(undef, N)
+#     ALMOSTONE = 1-tol
+#     # c = Vector{T}(undef, N)
+#     # d = Vector{T}(undef, N)
+#     # dc = Vector{T}(undef, N)
 
-    y = zeros(T, n, N)
-    log_p = zeros(T, N) # numerical stability
-    s = zeros(T, N)
+#     y = zeros(T, n, N)
+#     log_p = zeros(T, N) # numerical stability
+#     s = zeros(T, N)
 
-    for i in 1:n 
-        if i > 1
-            c .+= x[i-1, :] .* dc
-            c = map(x -> x > ALMOSTONE ? ALMOSTONE : x, c)
-            buf = norminvcdf.(c)
-            y[i-1, :] .= buf
-            s = y[1:i-1, 1:N]' * L[1:i-1,i]
-        end
+#     for i in 1:n 
+#         if i > 1
+#             c .+= x[i-1, :] .* dc
+#             c = map(x -> x > ALMOSTONE ? ALMOSTONE : x, c)
+#             buf = norminvcdf.(c)
+#             y[i-1, :] .= buf
+#             s = y[1:i-1, 1:N]' * L[1:i-1,i]
+#         end
 
-        ct = L[i, i]
-        ai = fill(convert(T, -Inf), N)
-        bi = fill(convert(T, Inf), N)
+#         ct = L[i, i]
+#         ai = fill(convert(T, -Inf), N)
+#         bi = fill(convert(T, Inf), N)
 
-        for j in 1:N
-            if a[i,j] != -Inf
-                ai[j] = a[i,j] - s[j]
-                ai[j] /= ct
-            end
+#         for j in 1:N
+#             if a[i,j] != -Inf
+#                 ai[j] = a[i,j] - s[j]
+#                 ai[j] /= ct
+#             end
     
-            if b[i,j] != Inf
-                bi[j] = b[i,j] - s[j]
-                bi[j] /= ct
-            end
-        end
+#             if b[i,j] != Inf
+#                 bi[j] = b[i,j] - s[j]
+#                 bi[j] /= ct
+#             end
+#         end
         
-        c = normcdf.(ai)
-        d = normcdf.(bi)
-        dc = d - c
-        log_p += log.(dc)
-    end
-    # c += x[n, :] .* dc
-	# c = map(x -> x > ALMOSTONE ? ALMOSTONE : x, c)
-	# buf = norminvcdf.(c) 
-	# y[n, :] .= buf 
+#         c = normcdf.(ai)
+#         d = normcdf.(bi)
+#         dc = d - c
+#         log_p += log.(dc)
+#     end
+#     # c += x[n, :] .* dc
+# 	# c = map(x -> x > ALMOSTONE ? ALMOSTONE : x, c)
+# 	# buf = norminvcdf.(c) 
+# 	# y[n, :] .= buf 
 
-    # return (p, y)
-    return exp.(log_p)
-end
+#     # return (p, y)
+#     return exp.(log_p)
+# end
 
 """
     mvn(L, a, b; ns = 10, N = 1000, tol = 1e-8, mu = 0)
     function to calculate normal probability P(a < x < b) where x ~ N(mu, LL^T) using 
-        the method of Genz (1992), which relies on randomized quasi-Monte Carlo Richtmyer generators and tends 
-        to produce results that converge substantially faster than Monte Carlo points.
+        the method of Genz (1992), which relies on randomized quasi-Monte Carlo Richtmyer generators and tends to produce results that converge substantially faster than Monte Carlo points.
     input: 
         - L: cholesky factor of the covariance matrix
         - a: lower bound
         - b: upper bound
-        - ns: The number of sample size (defalut=10)
+        - ns * N: sample size
+        - ns: simulation size (defalut=10)
         - N: Randomized QMC points (defalt=1000)
         - tol: tolerance (defalt=1e-8)
         - mu: mean (default=0)
@@ -90,6 +90,7 @@ function mvn(L::LowerTriangular{T,Array{T,2}}, a::AbstractArray{T, 1}, b::Abstra
     a1 = copy(a)
     b1 = copy(b)
     n = size(L, 1)
+    ALMOSTONE = 1-tol
 
     for i in 1:n
         if a1[i] != -Inf
@@ -105,11 +106,12 @@ function mvn(L::LowerTriangular{T,Array{T,2}}, a::AbstractArray{T, 1}, b::Abstra
         return normcdf.(b1)[1] - normcdf.(a1)[1]
     else
         # values produced by the ns samples, each with N randomized qmc points
+        # i.e. total sample size = ns * N as in Genton et al. 2018.
         values = Vector{T}(undef, ns) 
         X = Matrix{T}(undef, n, N)
-        ax = reshape(repeat(a1, N), n, N)
-        bx = reshape(repeat(b1, N), n, N)
-    
+        # ax = reshape(repeat(a1, N), n, N)
+        # bx = reshape(repeat(b1, N), n, N)
+
         # get prime numbers
         if n == 2
             prime_n = [2, 3]
@@ -128,7 +130,47 @@ function mvn(L::LowerTriangular{T,Array{T,2}}, a::AbstractArray{T, 1}, b::Abstra
                 X[:,j] = q * (1+j) + xr
             end
             X = map(x->abs(2*(x-floor(x))-1), X)
-            p = mvndns(n, N, L, X, ax, bx, tol)
+
+            samp = zeros(T, n, N)
+            log_p = zeros(T, N) # numerical stability
+            s = zeros(T, N)
+            c = zeros(T, N)
+            d = zeros(T, N)
+            dc = zeros(T, N)
+
+            for i in 1:n 
+                if i > 1
+                    c .+= X[i-1, :] .* dc
+                    c = map(x -> x > ALMOSTONE ? ALMOSTONE : x, c)
+                    buf = norminvcdf.(c)
+                    samp[i-1, 1:N] .= buf
+                    s = samp[1:i-1, 1:N]' * L[1:i-1,i]
+                end
+        
+                ct = L[i, i]
+
+                if a[i] != -Inf
+                    ai = a[i] .- s
+                    ai ./= ct
+                else 
+                    ai = fill(convert(T, -Inf), N)
+                end
+
+                if b[i] != Inf
+                    bi = b[i] .- s
+                    bi ./= ct
+                else 
+                    bi = fill(convert(T, Inf), N)
+                end
+                
+                c = normcdf.(ai)
+                d = normcdf.(bi)
+                dc = d - c
+                log_p += log.(dc)
+            end
+
+            p = exp.(log_p)
+
             values[i] = mean(filter(x -> !isnan(x), p)) # omit nan values
         end
         p_mean = mean(values) # estimated probabiliy

@@ -2,7 +2,6 @@
 
 ## Todo
 
-* Fix `NaN` issue in `CMVN()` simulation (Sec3-test.ipynb)
 * Test `HCMVN()` for simulation
 * Impelent `HRCMVN()` for simulation
 * Implemnt block ordering
@@ -14,6 +13,41 @@
 * Songhyun Kim (@than0you)
 
 All members are affiliated with Departments of Statistics, Seoul National University.
+
+## Description
+
+```
+.
+|-- final
+|   |-- chapters
+|   `-- figs
+|-- notebooks
+|-- proposal
+|-- refs
+`-- src 
+    |-- cmvn.jl
+    |-- generate.jl
+    |-- hchol.jl
+    |-- hcmvn.jl
+    |-- mvn.jl
+    |-- rcmvn.jl
+    |-- test.jl
+    `-- truncnorm.jl
+```
+
+* `final`: final presentation
+* `notebooks`: jupyter notebooks 
+* `proposal`: project proposal
+* `refs`: references
+* `src`: source codes
+  * `cmvn.jl`: Implement d-dimensional conditioning algorithm in julia
+  * `generate.jl`: Generate covariance matrix for simulations
+  * `hchol.jl`: Implement hierarchical decompositions in julia 
+  * `hcmvn.jl`: Compute high-dimensional normal probability using hierarchical decompositions
+  * `mvn.jl`: Compute normal probability and truncated expectation using QMC
+  * `rcmvn.jl`: d-dimensional conditioning algorithm with univariate reordering
+  * `test.jl`: example 
+  * `truncnorm.jl`: Compute normal probability and truncated expectation using MC
 
 ## Brief Introduction
 
