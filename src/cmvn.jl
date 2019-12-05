@@ -59,9 +59,14 @@ function CMVN(Σ::Symmetric{T,Array{T,2}}, a::Array{T,1}, b::Array{T,1}, d::Int;
     L, D = LDL(copy(Σ), d)
     for i in 1:s
         j = Int((i - 1) * d)
-        g = copy(L[(j + 1):(j + d), 1:j] * y[1:j])
-        a1 = a[(j + 1):(j + d)] .- g
-        b1 = b[(j + 1):(j + d)] .- g
+        if j > 1
+            g = copy(L[(j + 1):(j + d), 1:j] * y[1:j])
+            a1 = a[(j + 1):(j + d)] .- g
+            b1 = b[(j + 1):(j + d)] .- g
+        else
+            a1 = a[(j + 1):(j + d)]
+            b1 = b[(j + 1):(j + d)]
+        end
         D1 = Symmetric(copy(D[i]))
         L1 = cholesky(D1).L
         # P *= cdf_trunnormal(a1, b1, zeros(d), copy(Symmetric(D1)))
@@ -72,15 +77,6 @@ function CMVN(Σ::Symmetric{T,Array{T,2}}, a::Array{T,1}, b::Array{T,1}, d::Int;
         P *= p_i
         y[(j + 1):(j + d)] .= y_i
         
-        #println("############", i)
-        #println(P)
-        #println(a1)
-        #println(b1)
-        #println(L1)
-        #println(expt_tnorm(a1, b1, L1, ns = ns, N = N, tol = tol))
-        #println(a1)
-        #println(b1)
-        #println(L1)
     end
     return (P, y)
 end

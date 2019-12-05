@@ -2,6 +2,7 @@ using Primes
 using Statistics
 using Distributions
 using StatsFuns
+using LinearAlgebra
 
 # """
 #     mvndns(n, N, L, x, a, b; tol)
@@ -107,7 +108,7 @@ function mvn(L::LowerTriangular{T,Array{T,2}}, a::AbstractArray{T, 1}, b::Abstra
     end
 
     if n == 1
-        return normcdf.(b1)[1] - normcdf.(a1)[1]
+        return normcdf.(b1 / L[1, 1])[1] - normcdf.(a1 / L[1, 1])[1]
     else
         # values produced by the ns samples, each with N randomized qmc points
         # i.e. total sample size = ns * N as in Genton et al. 2018.
