@@ -6,7 +6,10 @@ include("cmvn.jl")
 Algorithm 3 in Cao2019
 d-dimensional conditioning algorithm with univariate reordering
 """
-function RCMVN(Σ::Symmetric{Float64,Array{Float64,2}}, a::Array{Float64,1}, b::Array{Float64,1}, d::Int64, m::Int64)
+function RCMVN(Σ::Symmetric{T,Array{T,2}}, a::Array{T,1}, b::Array{T,1}, d::Int;
+    m::Int = size(Σ, 1), ns::Int = 10, N::Int = 1000, tol = convert(T, 1e-8)) where T<:AbstractFloat
+    (m % d == 0) || throw(ArgumentError("The condition d|m must be met."))
+    
     Σ = Matrix(Σ)
     y = zeros(m)
     C = copy(Σ)
@@ -41,5 +44,5 @@ function RCMVN(Σ::Symmetric{Float64,Array{Float64,2}}, a::Array{Float64,1}, b::
         b_prime = (b[i] - transpose(C[i, 1:(i - 1)]) * y[1:(i - 1)]) / C[i, i]
         
     end
-    return CMVN(Symmetric(Σ), a, b, d, m)
+    return CMVN(Symmetric(Σ), a, b, d, m = m, ns = ns, N = N, tol = tol)
 end

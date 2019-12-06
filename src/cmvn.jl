@@ -52,7 +52,6 @@ end
 """
 function CMVN(Σ::Symmetric{T,Array{T,2}}, a::Array{T,1}, b::Array{T,1}, d::Int;
     m::Int = size(Σ, 1), ns::Int = 10, N::Int = 1000, tol = convert(T, 1e-8)) where T<:AbstractFloat
-
     (m % d == 0) || throw(ArgumentError("The condition d|m must be met."))
     s = trunc(Int, m / d)
     y = zeros(m)
@@ -60,10 +59,15 @@ function CMVN(Σ::Symmetric{T,Array{T,2}}, a::Array{T,1}, b::Array{T,1}, d::Int;
     L, D = LDL(copy(Σ), d)
     for i in 1:s
         j = Int((i - 1) * d)
-        g = L[(j + 1):(j + d), 1:j] * y[1:j]
-        a1 = a[(j + 1):(j + d)] .- g
-        b1 = b[(j + 1):(j + d)] .- g
-        D1 = Symmetric(D[i])
+        if j > 1
+            g = copy(L[(j + 1):(j + d), 1:j] * y[1:j])
+            a1 = a[(j + 1):(j + d)] .- g
+            b1 = b[(j + 1):(j + d)] .- g
+        else
+            a1 = a[(j + 1):(j + d)]
+            b1 = b[(j + 1):(j + d)]
+        end
+        D1 = Symmetric(copy(D[i]))
         L1 = cholesky(D1).L
         # P *= cdf_trunnormal(a1, b1, zeros(d), copy(Symmetric(D1)))
         # y[(j + 1):(j + d)] .= ex_trunnormal(a1, b1, zeros(d), copy(Symmetric(D1)))
@@ -72,6 +76,7 @@ function CMVN(Σ::Symmetric{T,Array{T,2}}, a::Array{T,1}, b::Array{T,1}, d::Int;
 
         P *= p_i
         y[(j + 1):(j + d)] .= y_i
+        
     end
     return (P, y)
 end
