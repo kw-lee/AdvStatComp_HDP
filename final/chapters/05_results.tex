@@ -17,6 +17,21 @@ numerically. We implement \texttt{mvn}, the function that calculate multivariate
 
 It is well-known that QMC methods is more effective than classical Monte Carlo(MC) method. All the multivariate normal distribution probabilities required in the next algorithms are calculated using the \texttt{mvn} function.
 
+\subsection{CMVN}
 % CMVN/RCMVN - 송현 (table 2)
+
+% \subsection{Cholesky Factorization}
+% 하면야 좋겠지만..
+
+\subsection{HMVN}
 % HCMVN - 경원 (table 3)
+
+In this section, we implement three methods in the section \ref{sec:hmvn} and compare theirs performance
+\begin{itemize}
+    \item \texttt{HMVN()}: Calculate multivariate normal probabilities using hierarchical-block approximation
+    \item \texttt{HCMVN()}: Calculate multivariate normal probabilities using hierarchical-block conditioning approximation
+    \item \texttt{HRCMVN()}: Calculate multivariate normal probabilities using hierarchical-block conditioning approximation with univarite reordering
+\end{itemize}
+
+\subsection{Block Reordering}
 % Block Reordering - 현석 (table 5, 6)

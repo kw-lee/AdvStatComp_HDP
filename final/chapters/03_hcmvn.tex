@@ -1,8 +1,9 @@
 
-\section{Hierarchical-Block Conditioning Approximations}
+\section{Hierarchical-Block Approximations}\label{sec:hmvn}
 
 % 5. HCMVN - 경원 Hchol, CMVN, RCMVN, blocking
-% \subsection{The Hierarchical-Block Conditioning Method}
+
+\subsection{The Hierarchical-Block Conditioning Method}
 
 In this section, we suggest methods to solve the $n$-dimensional MVN problem with the hierarchical covariance matrix using the $d$-dimensional conditioning method with that of the Monte Carlo-based method for solving the $m$-dimensional MVN problems presented by the diagonal blocks.
 
@@ -13,7 +14,7 @@ Let $\phi_m(\mathbf{x}; \boldsymbol{\Sigma})$ be a pdf of the $m$-dimensional no
     \cdots 
     \int_{\mathbf{a}_r'}^{\mathbf{b}_r'} \phi_r(\mathbf{x}_r; \mathbf{B}_r\mathbf{B}_r^T) d\mathbf{x}_r \cdots d\mathbf{x}_1.
 \end{equation}
-Where $\mathbf{a}',~\mathbf{b}'$, $i=1,\cdots,r$, are the corresponding segments of the updated $\mathbf{a}$ and $\mathbf{b}$. Specifficaly, we compute $n$-dimensional MVN problem using hierarchical structure as algorithm \ref{alg:hmvn}.
+Where $\mathbf{a}',~\mathbf{b}'$, $i=1,\cdots,r$, are the corresponding segments of the updated $\mathbf{a}$ and $\mathbf{b}$. Specifficaly, we can compute $n$-dimensional MVN problem using hierarchical structure as algorithm \ref{alg:hmvn}.
 
 \begin{algorithm}[H]
     \caption{Hierarchical-block conditioning algorithm}
@@ -42,4 +43,27 @@ Where $\mathbf{a}',~\mathbf{b}'$, $i=1,\cdots,r$, are the corresponding segments
     \end{algorithmic}\label{alg:hmvn}
 \end{algorithm}
 
-Note the probabilities $\Phi_m(\mathbf{a}_i, \mathbf{b}_i; \mathbf{0}, \mathbf{B}_i\mathbf{B}_i^T)$ can be computed using $d$-dimensional conditioning algorithm (\texttt{HCMVN}) or with $d$-dimensional conditioning algorithm with univariate reordering (\texttt{HRCMVN}). These methods are more effective and easily parallelizable than the classical methods.
+Note the probabilities $\Phi_m(\mathbf{a}_i, \mathbf{b}_i; \mathbf{0}, \mathbf{B}_i\mathbf{B}_i^T)$ can be computed using Quasi-Monte Carlo method (\texttt{HMVN}, Method 1 in \citet{cao2019hierarchical}),  $d$-dimensional conditioning algorithm (\texttt{HCMVN}, Method 2 in \citet{cao2019hierarchical}) or with $d$-dimensional conditioning algorithm with univariate reordering (\texttt{HRCMVN}, Method 3 in \citet{cao2019hierarchical}). These methods are more effective and easily parallelizable than the classical methods.
+
+\subsection{Computational Complexity}
+
+For a clearer comparison of the complexities, we decompose the complexity of Algorithm \ref{alg:hmvn} into three parts and list the complexity for each part in Table \ref{tbl:cc_hmvn}, where $M(\cdot)$ denotes the complexity of the QMC simulation in the given dimension. 
+Table \ref{tbl:cc_hmvn} shows that the time efﬁciency of the $d$-dimensional conditioning algorithm mainly comes from lowering the dimension in which the QMC simulation is performed. 
+
+\renewcommand{\arraystretch}{1.5}
+\begin{table}[ht]
+    \begin{center}
+        \begin{tabular}{l l l l}
+                            & MVN prob                     & Trunc exp          & Upd limits            \\
+            \hline
+            \texttt{HMVN}   & $\frac{n}{m} M(m)$           & $2nM(m) + O(nm^2)$ & $O(mn + kn log(n/m))$ \\
+            \texttt{HCMVN}  & $\frac{n}{d} M(d) + O(m^2n)$ & $2nM(d) + O(nd^2)$ & $O(mn + kn log(n/m))$ \\
+            \texttt{HRCMVN} & $\frac{n}{d} M(d) + O(m^2n)$ & $2nM(d) + O(nd^2)$ & $O(mn + kn log(n/m))$ \\
+            \hline
+        \end{tabular}
+        \caption{Complexity decomposition of the \texttt{HMVN}, \texttt{HCMVN}, and \texttt{HRCMVN}}\label{tbl:cc_hmvn}
+    \end{center}
+\end{table}
+\renewcommand{\arraystretch}{1}
+
+The three parts of the complexity are the calculation of the MVN probability (MVN prob), the calculation of the truncated expectations (Trunc exp), and the update of the integration limits with truncated expectations (Upd limits). The latter two share the same asymptotic order in all three complexity terms. The updating cost is independent of the method. The complexity of the univariate reordering is $O(m^2 n)$, the same as the complexity of computing the MVN probabilities in \texttt{HCMVN}, resulting in an identical major complexity component for \texttt{HCMVN} and \texttt{HRCMVN}. Since\texttt{HCMVN} and \texttt{HRCMVN} perform the QMC  simulation in $d$-dimensions, these two methods are not greatly affected by the choice of $m$.
