@@ -5,7 +5,18 @@
 
 % 나머지는 결과 나오면 body맞춰서 알아서 채워넣기 MVN, CMVN, RCMVN, HCMVN, Block Reordering
 
-% MVN - 경원
+\subsection{Multivariate Normal Probabilities} 
+
+To implement \texttt{*MVN} functions, we need to calculate $n$-dimensional normal probability \eqref{eqn:normalprob},
+$$
+\Phi_n(a, b; 0, \Sigma) = \int_a^b \frac{1}{\sqrt{(2\pi)^n |\Sigma|}} \exp\left( -\frac{1}{2} \mathbf{x}^T \Sigma^{-1} \mathbf{x} \right) d\mathbf{x},
+$$ 
+numerically. We implement \texttt{mvn}, the function that calculate multivariate normal probabilities using Richtmyer Quasi-Monte Carlo(QMC) method proposed by \citet{genz2009computation}.
+
+% table (table/qmc_vs_mc.ipynb)
+
+It is well-known that QMC methods is more effective than classical Monte Carlo(MC) method. All the multivariate normal distribution probabilities required in the next algorithms are calculated using the \texttt{mvn} function.
+
 % CMVN/RCMVN - 송현 (table 2)
 % HCMVN - 경원 (table 3)
 % Block Reordering - 현석 (table 5, 6)

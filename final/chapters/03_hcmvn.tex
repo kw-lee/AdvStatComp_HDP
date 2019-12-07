@@ -2,4 +2,44 @@
 \section{Hierarchical-Block Conditioning Approximations}
 
 % 5. HCMVN - 경원 Hchol, CMVN, RCMVN, blocking
-\subsection{The Hierarchical-Block Conditioning Method}
+% \subsection{The Hierarchical-Block Conditioning Method}
+
+In this section, we suggest methods to solve the $n$-dimensional MVN problem with the hierarchical covariance matrix using the $d$-dimensional conditioning method with that of the Monte Carlo-based method for solving the $m$-dimensional MVN problems presented by the diagonal blocks.
+
+Let $\phi_m(\mathbf{x}; \boldsymbol{\Sigma})$ be a pdf of the $m$-dimensional normal distribution $N(\mathbf{0}, \boldsymbol{\Sigma})$ and $(\mathbf{B}, \mathbf{U}\mathbf{V}^T)$ be the hierarchical Cholesky decompostion of the covariance matrix $\Sigma$. Then, we can express \eqref{eqn:normalprob} as 
+\begin{equation}\label{eqn:hmvn}
+    \Phi_n(\mathbf{a}, \mathbf{b}; \mathbf{0}, \boldsymbol{\Sigma}) 
+    = \int_{\mathbf{a}_1'}^{\mathbf{b}_1'} \phi_m(\mathbf{x}_1; \mathbf{B}_1\mathbf{B}_1^T) 
+    \cdots 
+    \int_{\mathbf{a}_r'}^{\mathbf{b}_r'} \phi_r(\mathbf{x}_r; \mathbf{B}_r\mathbf{B}_r^T) d\mathbf{x}_r \cdots d\mathbf{x}_1.
+\end{equation}
+Where $\mathbf{a}',~\mathbf{b}'$, $i=1,\cdots,r$, are the corresponding segments of the updated $\mathbf{a}$ and $\mathbf{b}$. Specifficaly, we compute $n$-dimensional MVN problem using hierarchical structure as algorithm \ref{alg:hmvn}.
+
+\begin{algorithm}[H]
+    \caption{Hierarchical-block conditioning algorithm}
+    \begin{algorithmic}[1]
+    
+    \Procedure{\texttt{HMVN}}{$a,~b,~\Sigma,~d$}
+        \State $\mathbf{x} \leftarrow \mathbf{0}$ and $P \leftarrow 1$
+        \State $[\mathbf{B}, \mathbf{UV}] \leftarrow$ \texttt{choldecomp\_hmatrix}$(\Sigma)$
+        \For{$i = 1:r$}
+            \State $j \leftarrow (i-1)m$
+            \If{$i>1$}
+                \State $o_r \leftarrow$ row offset of $\mathbf{U}_{i-1}\mathbf{V}_{i-1}^T$
+                \State $o_c \leftarrow$ column offset of $\mathbf{U}_{i-1}\mathbf{V}_{i-1}^T$
+                \State $l \leftarrow \dim(\mathbf{U}_{i-1}\mathbf{V}_{i-1}^T)$
+                \State $\mathbf{g} \leftarrow \mathbf{U}_{i-1}\mathbf{V}_{i-1}^T\mathbf{x}[o_c+1:o_c+l]$
+                \State $\mathbf{a}[o_r+1:o_r+l] = \mathbf{a}[o_r+1:o_r+l] - \mathbf{g}$
+                \State $\mathbf{b}[o_r+1:o_r+l] = \mathbf{a}[o_r+1:o_r+l] - \mathbf{g}$
+            \EndIf
+            \State $\mathbf{a}_i \leftarrow \mathbf{a}[j+1:j+m]$
+            \State $\mathbf{b}_i \leftarrow \mathbf{b}[j+1:j+m]$
+            \State $P = P*\Phi_m(\mathbf{a}_i, \mathbf{b}_i; \mathbf{0}, \mathbf{B}_i\mathbf{B}_i^T)$
+            \State $\mathbf{x}[j+1:j+m] \leftarrow \mathbf{B}_{i}^{-1} \expt{\mathbf{X}_i}$
+        \EndFor
+    \EndProcedure
+
+    \end{algorithmic}\label{alg:hmvn}
+\end{algorithm}
+
+Note the probabilities $\Phi_m(\mathbf{a}_i, \mathbf{b}_i; \mathbf{0}, \mathbf{B}_i\mathbf{B}_i^T)$ can be computed using $d$-dimensional conditioning algorithm (\texttt{HCMVN}) or with $d$-dimensional conditioning algorithm with univariate reordering (\texttt{HRCMVN}). These methods are more effective and easily parallelizable than the classical methods.
