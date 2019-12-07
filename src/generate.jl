@@ -31,3 +31,22 @@ function Σ_generate(m::Int)
     
     Symmetric(Q * J * transpose(Q))
 end
+
+function Σ_const_generate(n::Int, θ::T) where T <: AbstractFloat
+    Σ_const = (1-θ)*LinearAlgebra.I(n) + θ*ones(n, n)
+    Σ_const = Symmetric(Σ_const)
+    return Σ_const
+end
+
+function Σ_1d_generate(n::Int, β::T) where T>: AbstractFloat
+    Σ_1d = ones(n, n)
+    for i in 1:n
+        for j in 1:i
+            d_ij = abs(i - j)
+            Σ_1d[i, j] = exp(-d_ij / β)
+            Σ_1d[j, i] = exp(-d_ij / β)    
+        end
+    end
+    Σ_1d = Symmetric(Σ_1d)
+    return Σ_1d
+end
