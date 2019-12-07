@@ -34,3 +34,7 @@ refs/
 
 # MacOS
 *.DS_store
+
+# fonts
+# download from http://www.kopus.org/Biz/electronic/Font2.aspx
+final/fonts/

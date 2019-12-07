@@ -100,6 +100,7 @@ This project has a five-point plan:
   * Statistics.jl
   * Distributions.jl
   * StatsFuns.jl
+* KoPub
 
 ## References
 
