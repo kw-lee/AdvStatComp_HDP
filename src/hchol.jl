@@ -1,10 +1,6 @@
-"""
-    Julia implementation for Genton, M. G., Keyes, D. E., & Turkiyyah, G. (2018). Hierarchical decompositions for the computation of high-dimensional multivariate normal probabilities. Journal of Computational and Graphical Statistics, 27(2), 268-277.
-    You can download original C++ codes at https://amstat.tandfonline.com/doi/abs/10.1080/10618600.2017.1375936
-"""
-
 using LinearAlgebra
 using Distributions
+using LowRankApprox
 
 mutable struct Tnode
     U::Matrix # U matrix
@@ -13,181 +9,124 @@ mutable struct Tnode
     i1::Int  # row offset
     j1::Int # col offset
     bsz::Int # block size
-    q::Int # hierarchical level
 end
 
-"""
-    function to perform low-rank approximation A \approx UV'
-    update U and V
-"""
-function updateTree!(UV::Tnode, A::SubArray{T, 2}, tol::T) where T<:AbstractFloat
+#only n/m=2^k
+function hchol_recur(A::Symmetric{T,Array{T,2}}, m::Int; tol=convert(T, 1e-8)) where T<: AbstractFloat
+    A = Matrix(A)
+    n = size(A)[1]
+    nb = n ÷ 2
+    if(n == m)
+        return Matrix(cholesky(A).L)
+    end
     
-    n = size(A, 1)
+    A11 = copy(A[1:nb, 1:nb])
+    A12 = copy(A[1:nb, (nb + 1):n])
+    A21 = copy(A[(nb + 1):n, 1:nb])
+    A22 = copy(A[(nb + 1):n, (nb + 1):n])    
+    A[1:nb, 1:nb] = hchol_recur(Symmetric(A11), m)
+
+    U12 = LowerTriangular(A[1:nb, 1:nb]) \ A12
+    L21 = transpose(U12)
     # kmax denote max rank. better heuristic needed here
-    kmax = 16 + Int(floor(3 * sqrt(n)))
-    kmax = kmax < n ? kmax : n; 
+    kmax = 16 + Int(floor(3 * sqrt(nb)))
+    kmax = kmax < nb ? kmax : nb
+    F = svd(L21)
+    A[(nb + 1):n, 1:nb] = F.U * diagm(vcat(sqrt.(F.S[1:kmax]), zeros(nb - kmax)))
+    A[1:nb, (nb + 1):n] = F.V * diagm(vcat(sqrt.(F.S[1:kmax]), zeros(nb - kmax)))
 
-    # For numerical stability
-    # Let AZ = QR, AO = A'Q = USV' for Z ~ N(0,1) 
-    # A = QQ' A = QVSU' ~ QV[1:k] S[1:k] U[1:k]'
-    Omega = rand(Normal(0,1), n, kmax)
-    AO = A * Omega
-    Q, R = qr(AO)
-
-    AO = transpose(A) * Q
-    F = svd(AO)
-    Uf = F.U
-    Vf = F.V
-    s = F.S
-
-    rank = kmax
-    for k in 1:kmax
-        if s[k] <= tol
-            rank = k-1
-            break
-        end
-    end
-
-    if (rank>1)&(rank==kmax) 
-        println("Warning: max rank reached")
-    end
-
-    s2 = sqrt.(s[1:rank])
-    U2 = Matrix{T}(undef, n, rank)
-    V2 = Matrix{T}(undef, kmax, rank)
-    for i in 1:n
-        for j in 1:rank
-            U2[i,j] = Uf[i,j] * s2[j]
-        end
-    end
-
-    for i in 1:kmax
-        for j in 1:rank
-            V2[i,j] = Vf[i,j] * s2[j]
-        end
-    end
-
-    UV.rank = rank
-    UV.U = Q*V2
-    UV.V = U2
+    A[(nb + 1):n, (nb + 1):n] = hchol_recur(Symmetric(A22 - L21 * transpose(L21)), m)
+    
+    return A
 end
 
-"""
-    build Tree
-    input: n, nlev
-    output: Array{Tnode}
-    todo: split size 2 to general integer d (Cao2019), we should change << operator
-"""
-function buildTree(T::Type, n::Int, nlev::Int)
-    tree = Array{Tnode}(undef, (1<<nlev) - 1)
-    for q in 1:nlev
-        bsz = n ÷ (1<<q)  # n / 2^(q+1), size of block at level q
-        for i in 1:(1<<(q-1))
-            zi = Int(i + (1<<(q-1)) - 1) # index of block in binary tree
-            tree[zi] = Tnode(
-                Matrix(undef, bsz, 2), Matrix(undef, 2, bsz), 2, # U, V, rank are undefined
-                (2*i-1)*bsz+1, 2*(i-1)*bsz+1, bsz, q)
-        end
-    end
-    return tree
-end
 
-"""
-    Build a dense Cholesky decomposition and put it in Hierarchical matrix format
-    todo: split size 2 to general integer d (Cao2019)
-"""
 function hchol(A::Symmetric{T,Array{T,2}}, m::Int; tol=convert(T, 1e-8)) where T<: AbstractFloat
-    n = size(A, 1)
-    (n % m == 0) || throw(ArgumentError("The condition m|n must be met."))
-    nb = n ÷ m 
-    nlev = Int(floor(log2(n/m))) # log2 will be changed to logd?
-    if m>n 
-        return 1
-    end
+    #setting for LowRankApprox
+    opts = LRAOptions(maxdet_tol = tol, sketch_randn_niter=1)
+    opts.sketch = :randn
+    opts.rtol = 5*eps(T)
+    
+    A = Matrix(A)
+    n = size(A)[1]
+    nlev = Int(floor(log2(n/m)))
+    UV = Array{Tnode}(undef, 2^nlev - 1)
+    k = 1
+    for i in 1:nlev
+        bsz = n ÷ 2^i
+        xbegin = 0; ybegin = bsz
+        
+        # kmax denote max rank. better heuristic needed here
+        kmax = 8 + Int(floor(sqrt(bsz)))
+        kmax = kmax < bsz ÷ 2 ? kmax : bsz ÷ 2
+        for j in 1:2^(i - 1)
+            if sum(abs, A[(xbegin + 1):(xbegin + bsz), (ybegin + 1):(ybegin + bsz)]) == 0
+                UV[k] = Tnode(
+                    zeros(bsz, 2), zeros(bsz, 2),
+                    0, xbegin + 1, ybegin + 1, bsz)
+            else
+                U, S, V = psvd(A[(xbegin + 1):(xbegin + bsz), (ybegin + 1):(ybegin + bsz)], opts, rank = kmax)
+                kmax = kmax < length(S) ? kmax : length(S)
+                A[(xbegin + 1):(xbegin + bsz), (ybegin + 1):(ybegin + kmax)] = U * diagm(sqrt.(S)) 
+                A[(xbegin + 1):(xbegin + bsz), (ybegin + kmax + 1):(ybegin + bsz)] .= 0 
+                A[(ybegin + 1):(ybegin + bsz), (xbegin + 1):(xbegin + kmax)] = V * diagm(sqrt.(S)) 
+                A[(ybegin + 1):(ybegin + bsz), (xbegin + kmax + 1):(xbegin + bsz)] .= 0
+                
+                UV[k] = Tnode(
+                    A[(xbegin + 1):(xbegin + bsz), (ybegin + 1):(ybegin + kmax)],
+                    A[(ybegin + 1):(ybegin + bsz), (xbegin + 1):(xbegin + kmax)],
+                    kmax, xbegin + 1, ybegin + 1, bsz)
+            end
 
-    L = cholesky(A).L
-
-    B = Vector{LowerTriangular{T,Array{T,2}}}(undef, nb)
-    for i in 1:nb
-        # diagonal matrix B
-        B[i] = LowerTriangular(L[(i-1)*m+1:i*m, (i-1)*m+1:i*m])
-    end
-
-    if nlev>0
-        # order = inorder(0, nlev)
-        UV = buildTree(T, n, nlev)
-        # ordering
-        # UV = permuteTree(UV, order)
-
-            # update built tree
-        for UV_i in UV
-            L_i = view(L, UV_i.i1:UV_i.i1+UV_i.bsz-1, UV_i.j1:UV_i.j1+UV_i.bsz-1)
-            updateTree!(UV_i, L_i, tol)
+            xbegin += bsz * 2; ybegin += bsz * 2
+            k += 1            
         end
-    else 
-        UV = Array{Tnode}(undef, 0)
+    end
+    
+    # bsz = n ÷ 2^nlev # block size; should be m
+    xbegin = 0; ybegin = 0
+    B = Vector{LowerTriangular{T,Array{T,2}}}(undef, 2^nlev)
+    for j in 1:2^nlev
+        L = A[(xbegin + 1):(xbegin + m), (ybegin + 1):(ybegin + m)]
+        B[j] = cholesky(L).L
+        # A[(xbegin + 1):(xbegin + m), (ybegin + 1):(ybegin + m)] = Matrix(B[j])
+        xbegin += m; ybegin += m
     end
     
     return (B, UV)
 end
 
+# function uncompress!(A::Array{T,2}, m::Int) where T<: AbstractFloat
+#     n = size(A)[1]
+#     if(n == m)
+#         return A = A * transpose(A)
+#     end
+#     nb = n ÷ 2
+#     A[1:nb, 1:nb] = uncompress!(A[1:nb, 1:nb], m)
+#     A[(nb + 1):n, 1:nb] = A[(nb + 1):n, 1:nb] * transpose(A[1:nb, (nb + 1):n])
+#     A[1:nb, (nb + 1):n] = transpose(A[(nb + 1):n, 1:nb])
+#     A[(nb + 1):n, (nb + 1):n] = uncompress!(A[(nb + 1):n, (nb + 1):n], m)
+#     return A
+# end
+
 """
     uncompress()
-    generates the explicit matrix lower triangular part only
+    generates the explicit matrix
 """
 function uncompress(B::Array{LowerTriangular{T,Array{T,2}},1}, UV::Array{Tnode,1}) where T<: AbstractFloat
     
     nb = length(B)
     m = size(B[1], 1)
-    L = zeros(T, nb*m, nb*m)
-    L = LowerTriangular(L)
+    A = zeros(T, nb*m, nb*m)
     for i in 1:nb
-        L[(i-1)*m+1:i*m, (i-1)*m+1:i*m] = B[i]
+        A[(i-1)*m+1:i*m, (i-1)*m+1:i*m] = B[i] * B[i]'
     end
 
     for UV_i in UV
-        L[UV_i.i1:UV_i.i1+UV_i.bsz-1, UV_i.j1:UV_i.j1+UV_i.bsz-1] .= UV_i.U * UV_i.V'
+        A[UV_i.i1:UV_i.i1+UV_i.bsz-1, UV_i.j1:UV_i.j1+UV_i.bsz-1] .= UV_i.U * UV_i.V'
+        A[UV_i.j1:UV_i.j1+UV_i.bsz-1, UV_i.i1:UV_i.i1+UV_i.bsz-1] = transpose(A[UV_i.i1:UV_i.i1+UV_i.bsz-1, UV_i.j1:UV_i.j1+UV_i.bsz-1])
     end
 
-    return(L)
-end
-
-
-"""
-    displayTree()
-    Display H-matrix
-"""
-function displayTree(Tree::Array{Tnode,1})
-    for UV_i in Tree
-        block = [UV_i.i1:UV_i.i1+UV_i.bsz-1, UV_i.j1:UV_i.j1+UV_i.bsz-1]
-        rank = UV_i.rank
-        println("Block: ", block, ", Rank: ", rank)
-    end
-end
-
-"""
-    hstats()
-    Distance between H-matrix and original matrix
-    To be Declared
-"""
-function hstats()
-    return 0
-end
-
-"""
-    permute Tree by block ordering
-    To be Declared
-"""
-function permuteTree(UV, order::Vector{Int})
-    # uvsize = length(UV)
-    # UVnew = zeros(uvsize)
-end
-
-"""
-    inorder()
-    compute block order
-    To be Declared
-"""
-function inorder()
-
+    # L = LowerTriangular(L)
+    return A
 end
