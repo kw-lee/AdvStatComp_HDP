@@ -1,5 +1,6 @@
 using LinearAlgebra
 using Distributions
+using LowRankApprox
 
 #only n/m=2^k
 function hchol_recur(A::Symmetric{T,Array{T,2}}, m::Int; tol=convert(T, 1e-8)) where T<: AbstractFloat
@@ -32,6 +33,11 @@ end
 
 
 function hchol(A::Symmetric{T,Array{T,2}}, m::Int; tol=convert(T, 1e-8)) where T<: AbstractFloat
+    #setting for LowRankApprox
+    opts = LRAOptions(maxdet_tol=0., sketch_randn_niter=1)
+    opts.sketch = :randn
+    opts.rtol = 5*eps(real(Float64))
+    
     A = Matrix(A)
     n = size(A)[1]
     nlev = Int(floor(log2(n/m)))
@@ -40,24 +46,27 @@ function hchol(A::Symmetric{T,Array{T,2}}, m::Int; tol=convert(T, 1e-8)) where T
         xbegin = 0; ybegin = nb
         
         # kmax denote max rank. better heuristic needed here
-        kmax = 16 + Int(floor(3 * sqrt(nb)))
-        kmax = kmax < nb ? kmax : nb
-        
+        kmax = 8 + Int(floor(sqrt(nb)))
+        kmax = kmax < nb ÷ 2 ? kmax : nb ÷ 2
         for j in 1:2^(i - 1)
-            L = A[(xbegin + 1):(xbegin + nb), (ybegin + 1):(ybegin + nb)]
-            F = svd(L)
-            A[(xbegin + 1):(xbegin + nb), (ybegin + 1):(ybegin + nb)] = F.U * diagm(vcat(sqrt.(F.S[1:kmax]), zeros(nb - kmax)))
-            A[(ybegin + 1):(ybegin + nb), (xbegin + 1):(xbegin + nb)] = F.V * diagm(vcat(sqrt.(F.S[1:kmax]), zeros(nb - kmax)))
+            U, S, V = psvd(A[(xbegin + 1):(xbegin + nb), (ybegin + 1):(ybegin + nb)], opts, rank = kmax)
+            
+            A[(xbegin + 1):(xbegin + nb), (ybegin + 1):(ybegin + kmax)] = U * diagm(sqrt.(S))
+            A[(xbegin + 1):(xbegin + nb), (ybegin + kmax + 1):(ybegin + nb)] .= 0
+            A[(ybegin + 1):(ybegin + nb), (xbegin + 1):(xbegin + kmax)] = V * diagm(sqrt.(S))
+            A[(ybegin + 1):(ybegin + nb), (xbegin + kmax + 1):(xbegin + nb)] .= 0
+            
             xbegin += nb * 2; ybegin += nb * 2
         end
     end
+    
     nb = n ÷ 2^nlev
     xbegin = 0; ybegin = 0
     for j in 1:2^nlev
         L = A[(xbegin + 1):(xbegin + nb), (ybegin + 1):(ybegin + nb)]
         A[(xbegin + 1):(xbegin + nb), (ybegin + 1):(ybegin + nb)] = Matrix(cholesky(L).L)
         xbegin += nb; ybegin += nb
-    end
+        end
     
     return A
 end
