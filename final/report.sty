@@ -1,0 +1,340 @@
+% report.sty Kyeongwon Lee, June 10
+
+% packages
+\RequirePackage[usenames,dvipsnames,svgnames,table]{xcolor} 
+\RequirePackage{kotex}
+\RequirePackage{graphicx}
+\RequirePackage{epsfig}
+\RequirePackage{amssymb, amsmath, mathtools}
+\RequirePackage{verbatim}
+\RequirePackage[affil-it]{authblk}
+\RequirePackage{mathrsfs}
+\RequirePackage{here}
+\RequirePackage{makecell}
+\RequirePackage{tikz}
+\RequirePackage{enumerate}
+\RequirePackage[shortlabels]{enumitem}
+\RequirePackage{yfonts}
+\RequirePackage{comment}
+\RequirePackage{longtable}
+\RequirePackage{listings} % code
+\RequirePackage{amsthm}
+% \RequirePackage{romannum} % roman number
+\RequirePackage{setspace}
+\RequirePackage{subcaption}
+% \RequirePackage{indentfirst}
+% \RequirePackage{float}
+% \RequirePackage{tipa} %use textcorner
+% \RequirePackage[sort&compress]{natbib} %bibtex
+\RequirePackage[%
+% numberedbib,
+  natbibapa
+]{apacite} 
+% \RequirePackage{fancyhdr} %heading
+\RequirePackage{hyperref}
+% \renewcommand{\contentsname}{목차} % table of content에서 Contents 를 목차로 바꾸어 준다. 
+% \renewcommand{\refname}{참고문헌} % References를 참고문헌으로 바꾸어준다. 
+\RequirePackage{centernot} % 화살표의 부정
+% \RequirePackage[hyphens]{url}
+
+\bibliographystyle{apacite} % apa style로
+\RequirePackage{footnote}
+\makesavenoteenv{tabular}
+\makesavenoteenv{table}
+% 색
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\newcommand{\magenta}[1] {{\color{magenta} #1}}
+\definecolor{corrected}{rgb}{0.7808, 0.4429, 0.1412} % added by kwlee
+
+% kwhyperref added by kwlee
+\newcommand{\myhref}[3][blue]{\href{#2}{\color{#1}{#3}}}%
+\newcommand{\myhyperlink}[2]{%
+  \hyperlink{#1}{\textcolor{cyan}{\textit{#2}}}%
+}
+
+% code
+\lstset{ %
+  language=R,                     % the language of the code
+  basicstyle=\ttfamily\footnotesize,       % the size of the fonts that are used for the code
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
+  stepnumber=1,                   % the step between two line-numbers. If it's 1, each line
+                                  % will be numbered
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},
+  % backgroundcolor=\color{backcolour},  % choose the background color. You must add \RequirePackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  frame=single,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  captionpos=b,                   % sets the caption-position to bottom
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                 % show the filename of files included with \lstinputlisting;
+                                  % also try caption instead of title
+  keywordstyle=\color{blue},      % keyword style
+  commentstyle=\color{dkgreen},   % comment style
+  stringstyle=\color{mauve},      % string literal style
+  escapeinside={\%*}{*)},         % if you want to add a comment within your code
+  morekeywords={*,...}            % if you want to add more keywords to the set
+} 
+
+%-----------------------------------------------
+% 정리, 레마 등 환경의 정의. 니터 혹은 비머 파일에서는 이 명령들을 주석으로 만들어서 없애야 한다. 증명과 문제도 마찬가지 이다.
+%----------------------------------------------- 
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{result}[theorem]{Result}
+\newtheorem{fact}[theorem]{Fact}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{remarks}[theorem]{Remarks}
+
+\newtheorem*{theorem*}{Theorem}
+\newtheorem*{lemma*}{Lemma}
+\newtheorem*{definition*}{Definition}
+\newtheorem*{proposition*}{Proposition}
+\newtheorem*{corollary*}{Corollary}
+\newtheorem*{result*}{Result}
+\newtheorem*{fact*}{Fact}
+\newtheorem*{remark*}{Remark}
+\newtheorem*{remarks*}{Remarks}
+
+%-----------------------------------------------
+% math symbols
+%-----------------------------------------------
+
+\newcommand{\setdiff}{-}
+\newcommand{\plim}{\xrightarrow[n \rightarrow \infty]{p}}
+\newcommand{\dlim}{\xrightarrow[n \rightarrow \infty]{d}}
+% independent!
+\def\indep{\perp\!\!\!\perp}
+\newcommand{\toinf}{\rightarrow\infty}
+\DeclareRobustCommand{\rchi}{{\mathpalette\irchi\relax}}
+\newcommand{\irchi}[2]{\raisebox{\depth}{$#1\chi$}} % inner command, used by \rchi
+
+% just to make sure it exists
+\providecommand\given{}
+% can be useful to refer to this outside \Set
+\newcommand\SetSymbol[1][]{%
+  \nonscript\:#1\vert
+  \allowbreak
+  \nonscript\:
+  \mathopen{}
+}
+
+\DeclarePairedDelimiterX\Set[1]\{\}{%
+  \renewcommand\given{\SetSymbol[\delimsize]}
+  #1
+}
+\DeclarePairedDelimiterXPP\prob[1]{\mathbb{P}}(){}{
+  \renewcommand\given{\nonscript\:\delimsize\vert\nonscript\:\mathopen{}}
+  #1
+}
+\DeclarePairedDelimiterXPP\expt[1]{\mathbb{E}}[]{}{
+  \renewcommand\given{\nonscript\:\delimsize\vert\nonscript\:\mathopen{}}
+  #1
+}
+\DeclarePairedDelimiterXPP\Var[1]{\operatorname{Var}}(){}{
+  \renewcommand\given{\nonscript\:\delimsize\vert\nonscript\:\mathopen{}}
+  #1
+}
+\DeclarePairedDelimiterXPP\Cov[1]{\operatorname{Cov}}(){}{
+  \renewcommand\given{\nonscript\:\delimsize\vert\nonscript\:\mathopen{}}
+  #1
+}
+\DeclarePairedDelimiterXPP\indic[1]{\operatorname{I}}(){}{
+  \renewcommand\given{\nonscript\:\delimsize\vert\nonscript\:\mathopen{}}
+  #1
+}
+\DeclarePairedDelimiterXPP\Log[1]{\operatorname{log}}(){}{#1}
+\DeclarePairedDelimiterXPP\Exp[1]{\operatorname{exp}}(){}{#1}
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}%
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}%
+\DeclarePairedDelimiter\pbrac{(}{)}%
+\DeclarePairedDelimiter\sbrac{[}{]}%
+\DeclarePairedDelimiter\cbrac{\{}{\}}%
+\DeclarePairedDelimiter\Det{|}{|}%
+
+\DeclarePairedDelimiterXPP\Multi[2]{\textrm{Multi}}(){}{#1;#2}
+\DeclarePairedDelimiterXPP\geo[1]{\textrm{Geo}}(){}{#1}
+\DeclarePairedDelimiterXPP\negbin[1]{\textrm{Nbin}}(){}{#1}
+\DeclarePairedDelimiterXPP\gammad[2]{\textrm{Gamma}}(){}{#1,#2}
+\DeclarePairedDelimiterXPP\normd[2]{\textrm{N}}(){}{#1,#2}
+\DeclarePairedDelimiterXPP\betad[2]{\textrm{Beta}}(){}{#1,#2}
+\DeclarePairedDelimiterXPP\expd[1]{\textrm{Exp}}(){}{#1}
+\DeclarePairedDelimiterXPP\pois[1]{\textrm{Poisson}}(){}{#1}
+\DeclarePairedDelimiterXPP\unif[2]{\mathcal{U}}(){}{#1, #2}
+
+\DeclarePairedDelimiterXPP\gammaf[1]{\Gamma}(){}{#1}
+\DeclarePairedDelimiterXPP\betaf[2]{\textrm{B}}(){}{#1, #2}
+% swap star and unstar
+\makeatletter
+\let\oldSet\Set
+\def\Set{\@ifstar{\oldSet}{\oldSet*}}
+\let\oldprob\prob
+\def\prob{\@ifstar{\oldprob}{\oldprob*}}
+\let\oldexpt\expt
+\def\expt{\@ifstar{\oldexpt}{\oldexpt*}}
+\let\oldVar\Var
+\def\Var{\@ifstar{\oldVar}{\oldVar*}}
+\let\oldCov\Cov
+\def\Cov{\@ifstar{\oldCov}{\oldCov*}}
+\let\oldindic\indic
+\def\indic{\@ifstar{\oldindic}{\oldindic*}}
+\let\oldLog\Log
+\def\Log{\@ifstar{\oldLog}{\oldLog*}}
+\let\oldExp\Exp
+\def\Exp{\@ifstar{\oldExp}{\oldExp*}}
+\let\oldabs\abs
+\def\abs{\@ifstar{\oldabs}{\oldabs*}}
+\let\oldnorm\norm
+\def\norm{\@ifstar{\oldnorm}{\oldnorm*}}
+\let\oldpbrac\pbrac
+\def\pbrac{\@ifstar{\oldpbrac}{\oldpbrac*}}
+\let\oldsbrac\sbrac
+\def\sbrac{\@ifstar{\oldsbrac}{\oldsbrac*}}
+\let\oldcbrac\cbrac
+\def\cbrac{\@ifstar{\oldcbrac}{\oldcbrac*}}
+\let\oldgammaf\gammaf
+\def\gammaf{\@ifstar{\oldgammaf}{\oldgammaf*}}
+\let\oldbetaf\betaf
+\def\betaf{\@ifstar{\oldbetaf}{\oldbetaf*}}
+\let\oldDet\Det
+\def\Det{\@ifstar{\oldDet}{\oldDet*}}
+\makeatother
+
+\newcommand{\Natural}{\mathbb{N}}
+\newcommand{\real}{\mathbb{R}}
+\newcommand{\equid}{\stackrel{d}{\equiv}}
+\newcommand{\defint}[3]{\sbrac{#1}_{#2}^{#3}} %[integrand] from #2 to #3
+\newcommand{\permut}[2]{\tensor[_#1]{P}{_#2}}
+\newcommand{\RNum}[1]{\uppercase\expandafter{\romannumeral #1\relax}} %roman number
+
+% modify pmatrix, https://tex.stackexchange.com/questions/14071/how-can-i-increase-the-line-spacing-in-a-matrix
+\begingroup
+\renewcommand*{\arraystretch}{1.5}
+\endgroup
+\makeatletter
+\renewcommand*\env@matrix[1][\arraystretch]{%
+  \edef\arraystretch{#1}%
+  \hskip -\arraycolsep
+  \let\@ifnextchar\new@ifnextchar
+  \array{*\c@MaxMatrixCols c}}
+\makeatother
+
+\everymath{\displaystyle} % 모든 math를 displaystyle로! 짱좋아보인다.
+
+\newcommand{\iid}{\stackrel{i.i.d.}{\sim}}
+\newcommand{\ind}{\stackrel{ind.}{\sim}}
+\newcommand{\eqid}{\stackrel{d}{=}}
+\newcommand{\define}{\stackrel{define}{\Longleftrightarrow}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% paragraphs and sections
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%         other letters
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% blackboard bold
+\newcommand{\bbC}{{ \mathbb{C}}}
+\newcommand{\bbE}{{ \mathbb{E}}}
+\newcommand{\bbN}{ \mathbb{N}}
+\newcommand{\bbP}{ \mathbb{P}} 
+\newcommand{\bbQ}{ \mathbb{Q}} 
+\newcommand{\bbR}{ \mathbb{R}}
+\newcommand{\bbX}{ \mathbb{X}}
+\newcommand{\bbY}{ \mathbb{Y}} 
+\newcommand{\bbZ}{ \mathbb{Z}}
+
+% caligraph
+\newcommand{\calA}{\mathcal{A}}
+\newcommand{\calB}{\mathcal{B}}
+\newcommand{\calC}{\mathcal{C}}
+\newcommand{\calD}{\mathcal{D}}
+\newcommand{\calE}{\mathcal{E}}
+\newcommand{\calF}{\mathcal{F}}
+\newcommand{\calG}{\mathcal{G}}
+\newcommand{\calH}{\mathcal{H}}
+\newcommand{\calL}{\mathcal{L}}
+\newcommand{\calM}{\mathcal{M}}
+\newcommand{\calP}{\mathcal{P}}
+\newcommand{\calQ}{\mathcal{Q}}
+\newcommand{\calR}{\mathcal{R}}
+\newcommand{\calS}{\mathcal{S}}
+\newcommand{\calT}{\mathcal{T}}
+\newcommand{\calX}{ \mathcal{X}}
+\newcommand{\calY}{\mathcal{Y}} 
+\newcommand{\calZ}{\mathcal{Z}}
+
+% boldsymbol
+\newcommand{\balpha}{ \boldsymbol{\alpha}}
+\newcommand{\bbeta}{ \boldsymbol{\beta}}
+\newcommand{\bepsilon}{ \boldsymbol{\epsilon}}
+\newcommand{\blambda}{ \boldsymbol{\lambda}}
+\newcommand{\bmu}{ \boldsymbol{\mu}}
+\newcommand{\bnu}{ \boldsymbol{\nu}}
+\newcommand{\bpi}{ \boldsymbol{\pi}}
+\newcommand{\bphi}{ \boldsymbol{\phi}}
+\newcommand{\bpsi}{ \boldsymbol{\psi}}
+\newcommand{\btheta}{ \boldsymbol{\theta}}
+\newcommand{\bomega}{ \boldsymbol{\omega}}
+\newcommand{\bxi}{ \boldsymbol{\xi}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%      other styles
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand{\baselinestretch}{1.5}
+\parindent=15pt
+\textheight 22cm 
+\textwidth  16cm 
+\oddsidemargin 0mm 
+\topmargin     0mm
+\headheight    0mm
+\setstretch{1.3}
+% \setlength{\parindent} {10pt}
+
+% hyperref 변경
+\hypersetup{
+    % hidelinks=true,
+    pdfencoding=auto,
+    bookmarksnumbered=true
+}
+
+% \newenvironment{eabstract}{%
+%         \rule{\textwidth}{0.4pt}\vspace{-1.2em}
+%         \begin{center}%
+%           {{\sf\bfseries  Abstract}\vspace{-0.7em}\vspace{\z@}}
+%           \vspace{-.5em}
+%         \end{center}%
+%          \small \footnotesize}
+
+% \RequirePackage[titles]{tocloft} % when toc objs are too long!
+% \renewcommand*\cftsecnumwidth{3em}
+
+% autoref
+\def\equationautorefname~#1\null{식 (#1)\null}
+\def\sectionautorefname~#1\null{#1장\null}
+\def\subsectionautorefname~#1\null{#1절\null}
+% \def\figureautorefname~#1\null{그림 #1\null}
+% \def\paragraphautorefname~#1\null{#1\null}
+% \def\tableautorefname~#1\null{표 #1\null}
+% \def\algocflineautorefname~#1\null{Algorithm #1\null}
+% \allowdisplaybreaks
