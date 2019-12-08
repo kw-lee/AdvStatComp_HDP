@@ -5,13 +5,13 @@
     \begin{itemize}
         \item The computation of the multivariate normal (MVN) probability 
         \begin{equation}\label{eqn:normalprob}
-            \Phi_n(\mathbf{a}, \mathbf{b}; 0, \Sigma) = \int_a^b \frac{1}{\sqrt{(2\pi)^n |\Sigma|}} \exp\left( -\frac{1}{2} \mathbf{x}^T \Sigma^{-1} \mathbf{x} \right) d\mathbf{x},
+            \Phi_n(\mathbf{a}, \mathbf{b}; 0, \boldsymbol{\Sigma}) = \int_a^b \frac{1}{\sqrt{(2\pi)^n |\boldsymbol{\Sigma}|}} \exp\left( -\frac{1}{2} \mathbf{x}^T \boldsymbol{\Sigma}^{-1} \mathbf{x} \right) d\mathbf{x},
         \end{equation}
-        where $\mathbf{a}$ and $\mathbf{b}$ are integration limits, the mean vector $\mu$ is assumed to be 0, $\Sigma$ is a positive-definite covariance matrix, is required for a variety of applications. 
+        where $\mathbf{a}$ and $\mathbf{b}$ are integration limits, the mean vector $\mu$ is assumed to be 0, $\boldsymbol{\Sigma}$ is a positive-definite covariance matrix, is required for a variety of applications. 
         \item Various methods to compute MVN probability are suggested such as Richtmyer Quasi-Monte Carlo(QMC) \citep{genz2009computation}
         \item However, In high-dimensional settings (large $n$), it is hard to compute \eqref{eqn:normalprob} directly.
         \item We review new approaches proposed by \citet{cao2019hierarchical} to approximate high-dimensional multivariate normal probability \eqref{eqn:normalprob}
-        using the hierarchical matrix $\mathcal{H}$ \citep{hackbusch2015hierarchical} for the covariance matrix $\Sigma$. 
+        using the hierarchical matrix $\mathcal{H}$ \citep{hackbusch2015hierarchical} for the covariance matrix $\boldsymbol{\Sigma}$. 
         % \item The methods are based on the bivariate conditioning method \citep{trinh2015bivariate} and the hierarchical Quasi-Monte Carlo method \citep{genton2018hierarchical}.
     \end{itemize}
     

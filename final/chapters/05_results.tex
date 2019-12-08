@@ -4,7 +4,7 @@ In this section, we show you the results of implementing and experimenting with 
 
 \subsection{Cholesky Factorization}
 
-The \textit{chol} function from \textbf{LinearAlgebra} package, the \textit{dpotrf} from \textbf{LAPACK} package, and hierarchical cholesky decomposition which suggested by \citet{hackbusch2015hierarchical} are implemented. Exponential covariance matrix, $\Sigma_{ij}=exp(-\lVert \mathbf{s}_i-\mathbf{s}_j \rVert/\beta)$ is set with $\beta=0.3$. $n$ points, $\mathbf{s}_1,\cdots,\mathbf{s}_n$ is evenly distributed over unique square with Morton's order which defined recursively as described in figure \ref{fig:morton}.
+The \textit{chol} function from \textbf{LinearAlgebra} package, the \textit{dpotrf} from \textbf{LAPACK} package, and hierarchical cholesky decomposition which suggested by \citet{hackbusch2015hierarchical} are implemented. Exponential covariance matrix, $\boldsymbol{\Sigma}_{ij}=exp(-\lVert \mathbf{s}_i-\mathbf{s}_j \rVert/\beta)$ is set with $\beta=0.3$. $n$ points, $\mathbf{s}_1,\cdots,\mathbf{s}_n$ is evenly distributed over unique square with Morton's order which defined recursively as described in figure \ref{fig:morton}.
 
 \begin{figure}[h]
 \centering
@@ -31,14 +31,14 @@ With various $n$, three Cholesky methods are applied and results are below table
 	\caption{}
 	\label{tab:table1}
 \end{table}
-Hierarchical cholesky decomposition is more efficient than other classical cholesky method with large dimension. Hierarchical cholesky decomposition provides $\Sigma\approx L_HL_H^T$. Its relative error is defined as $\frac{\lVert\Sigma-L_HL_H^T\rVert_2}{\lVert\Sigma\rVert_2}$, and table \ref{tab:table1} ensures accuracy of hierarchical cholesky decomposition proposed by \citet{hackbusch2015hierarchical}.
+Hierarchical cholesky decomposition is more efficient than other classical cholesky method with large dimension. Hierarchical cholesky decomposition provides $\boldsymbol{\Sigma}\approx L_HL_H^T$. Its relative error is defined as $\frac{\lVert\boldsymbol{\Sigma}-L_HL_H^T\rVert_2}{\lVert\boldsymbol{\Sigma}\rVert_2}$, and table \ref{tab:table1} ensures accuracy of hierarchical cholesky decomposition proposed by \citet{hackbusch2015hierarchical}.
 
 
 \subsection{Multivariate Normal Probabilities} 
 
 To implement \texttt{*MVN} functions, we need to calculate $n$-dimensional normal probability \eqref{eqn:normalprob},
 $$
-\Phi_n(a, b; 0, \Sigma) = \int_a^b \frac{1}{\sqrt{(2\pi)^n |\Sigma|}} \exp\left( -\frac{1}{2} \mathbf{x}^T \Sigma^{-1} \mathbf{x} \right) d\mathbf{x},
+\Phi_n(a, b; 0, \boldsymbol{\Sigma}) = \int_a^b \frac{1}{\sqrt{(2\pi)^n |\boldsymbol{\Sigma}|}} \exp\left( -\frac{1}{2} \mathbf{x}^T \boldsymbol{\Sigma}^{-1} \mathbf{x} \right) d\mathbf{x},
 $$ 
 numerically. We implement \texttt{mvn}, the function that calculate multivariate normal probabilities using Richtmyer Quasi-Monte Carlo(QMC) method proposed by \citet{genz2009computation}. It is well-known that QMC methods is more effective than classical Monte Carlo(MC) method. Varying sample size $N$ and dimension $d$, two Monte Carlo methods are compared and results are below table \ref{tab:qmc_vs_mc}. We generate $N$ samples from $N(0, I_d)$ and set $\mathbf{a}_i = -\infty$ and $\mathbf{b}_i = 0$, i.e. true probabilities are $1/2^d$s, and repeat 20 times. Relative errors and computation times of each method are formulated.
 
@@ -88,7 +88,7 @@ Haar distribution is defined with a uniform distribution in the unitary $N\times
 	Let the independent vectors $x_1,\cdots,x_{n}$ be distributed $N(0,\sigma^2 \mathbf{I})$. For $j=1,2,\cdots,n-1$, let $\mathbf{\bar{H}}_{x_j}$ be the Householder transformation that reduces $x_j$ to $r_{jj}e_1$, where $r_{ij}$ is obtained in QR decomposition of $[x_1,\cdots,x_n]$ Let $\mathbf{H}_j=diag(\mathbf{I}_{j-1},\bar{\mathbf{H}}_j)$. Let $\mathbf{D}=diag(sign(r_{11}), \cdots, sign(r_{nn}))$. Then the product $\mathbf{Q}=\mathbf{DH_1\cdots H_{n-1}}$ follows Haar Distribution.
 \end{theorem}
 
-We simulates 250 MVN problems with various values of $m$ and $d$. $\mathbf{\Sigma}=\mathbf{Q}\mathbf{J}\mathbf{Q}^T$ is simulated with $\mathbf{Q}\sim{Haar distribution}$ and $J=diag(j_i)$ where $j_1,\cdots,j_m\sim U(0,1)$. Integration limits $a_i=-\infty$ and $b_i\sim(U,m)$ for $i=1\cdots,m$ are chosen. Estimated value is compared with approximated value obtained via quasi monte carlo method with a sample size of $10^4$, which ensures error below $10^{-4}$, and relative error and spent time is formulated below.
+We simulates 250 MVN problems with various values of $m$ and $d$. $\boldsymbol{\Sigma}=\mathbf{Q}\mathbf{J}\mathbf{Q}^T$ is simulated with $\mathbf{Q}\sim{Haar distribution}$ and $J=diag(j_i)$ where $j_1,\cdots,j_m\sim U(0,1)$. Integration limits $a_i=-\infty$ and $b_i\sim(U,m)$ for $i=1\cdots,m$ are chosen. Estimated value is compared with approximated value obtained via quasi monte carlo method with a sample size of $10^4$, which ensures error below $10^{-4}$, and relative error and spent time is formulated below.
 
 \begin{table}[h]
 	\centering
@@ -128,10 +128,49 @@ Estimation error tended to decrease as $d$ increases with each $m$ since lager $
 
 In this section, we implement three methods in the section \ref{sec:hmvn} and compare theirs performance
 \begin{itemize}
-    \item \texttt{HMVN()}: Calculate multivariate normal probabilities using hierarchical-block approximation
-    \item \texttt{HCMVN()}: Calculate multivariate normal probabilities using hierarchical-block conditioning approximation
-    \item \texttt{HRCMVN()}: Calculate multivariate normal probabilities using hierarchical-block conditioning approximation with univarite reordering
+    \item M1, \texttt{HMVN()}: Calculate multivariate normal probabilities using hierarchical-block approximation
+    \item M2, \texttt{HCMVN()}: Calculate multivariate normal probabilities using hierarchical-block conditioning approximation
+    \item M3, \texttt{HRCMVN()}: Calculate multivariate normal probabilities using hierarchical-block conditioning approximation with univarite reordering
 \end{itemize}
+
+We use 20 as the sample size instead of 250 as in Table \ref{tab:table2} because the covariance structure is ﬁxed, leading to a much smaller standard deviation for the estimators. We simulates two spatial problems with various values of $m$ and $n$
+
+\begin{enumerate}
+	\item Constant covariance matrix: $k(x_i, x_j) = \theta + (1-\theta)\delta_{ij}$ for some $|\theta| < 1$.
+	\item 1D exponential covariance matrix: $k(x_i, x_j) = \exp(-d_{ij}/\beta)$ for some $\beta > 0$, where $d_{ij}$ is the distance between $x_i$ and $x_j$.
+\end{enumerate}
+
+We set the integration limits $a_i=-\infty$ and $b_i\sim(U,n)$ for $i=1\cdots,n$ are chosen. Estimated value is compared with approximated value obtained via quasi monte carlo method with a sample size of $10^4$.
+
+% \begin{table}[h]
+% 	\centering
+% 	% \resizebox{.6\textwidth}{!}{%
+% 	{
+% 		\begin{tabular}{@{}cccccccccc@{}}
+% 			\toprule
+% 			$m$ 	& \multicolumn{3}{l}{16} & \multicolumn{3}{l}{32} & \multicolumn{3}{l}{64}  \\
+% 			$n$ 	& 256 & 512 & 1024 & 256 & 512 & 1024 & 256 & 512 & 1024 \\ \bottomrule
+			
+% 			\multicolumn{10}{l}{Constant covariance structure} \\ \midrule
+
+% 			\multirow{2}{*}{M1}
+% 			\multirow{2}{*}{M2} 
+% 			\multirow{2}{*}{M3}
+			
+% 			\multicolumn{10}{l}{1D exponential covariance matrix} \\ \midrule
+
+% 			\multirow{2}{*}{M1} 
+% 			\multirow{2}{*}{M2} 
+% 			\multirow{2}{*}{M3}
+			
+% 			\bottomrule
+% 		\end{tabular}%
+% 	}
+% 	\caption{Errors and execution times under the constant covariance structure and 1D exponential covariance structure}
+% 	\label{tab:table3}
+% \end{table}
+
+Estimation error tended to decrease as $d$ increases with each $m$ since lager $d$ implers less discarded correlation information. Spent time grows to a linear fashion with m while it grows exponentially with $d$.
 
 \subsection{Block Reordering}
 % Block Reordering - 현석 (table 5, 6)

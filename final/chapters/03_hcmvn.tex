@@ -43,7 +43,7 @@ Hierachical cholesky decomposition of $n\times n$ matrix into $m\times m$ blocks
 
 \subsection{The Hierarchical-Block Conditioning Method}
 
-Let $\phi_m(\mathbf{x}; \boldsymbol{\Sigma})$ be a pdf of the $m$-dimensional normal distribution $N(\mathbf{0}, \boldsymbol{\Sigma})$ and $(\mathbf{B}, \mathbf{U}\mathbf{V}^T)$ be the hierarchical Cholesky decompostion of the covariance matrix $\Sigma$. Then, we can express \eqref{eqn:normalprob} as 
+Let $\phi_m(\mathbf{x}; \boldsymbol{\Sigma})$ be a pdf of the $m$-dimensional normal distribution $N(\mathbf{0}, \boldsymbol{\Sigma})$ and $(\mathbf{B}, \mathbf{U}\mathbf{V}^T)$ be the hierarchical Cholesky decompostion of the covariance matrix $\boldsymbol{\Sigma}$. Then, we can express \eqref{eqn:normalprob} as 
 \begin{equation}\label{eqn:hmvn}
     \Phi_n(\mathbf{a}, \mathbf{b}; \mathbf{0}, \boldsymbol{\Sigma}) 
     = \int_{\mathbf{a}_1'}^{\mathbf{b}_1'} \phi_m(\mathbf{x}_1; \mathbf{B}_1\mathbf{B}_1^T) 
@@ -56,9 +56,9 @@ Where $\mathbf{a}',~\mathbf{b}'$, $i=1,\cdots,r$, are the corresponding segments
     \caption{Hierarchical-block conditioning algorithm}
     \begin{algorithmic}[1]
     
-    \Procedure{\texttt{HMVN}}{$a,~b,~\Sigma,~d$}
+    \Procedure{\texttt{HMVN}}{$a,~b,~\boldsymbol{\Sigma},~d$}
         \State $\mathbf{x} \leftarrow \mathbf{0}$ and $P \leftarrow 1$
-        \State $[\mathbf{B}, \mathbf{UV}] \leftarrow$ \texttt{choldecomp\_hmatrix}$(\Sigma)$
+        \State $[\mathbf{B}, \mathbf{UV}] \leftarrow$ \texttt{choldecomp\_hmatrix}$(\boldsymbol{\Sigma})$
         \For{$i = 1:r$}
             \State $j \leftarrow (i-1)m$
             \If{$i>1$}

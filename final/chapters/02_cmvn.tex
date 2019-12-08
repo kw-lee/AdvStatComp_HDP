@@ -13,7 +13,7 @@ $$\boldsymbol{\Sigma} = \begin{pmatrix}
 \mathbf{D}_{1} & \mathbf{O}\\
 \mathbf{O} & \mathbf{\hat{D}}
 \end{pmatrix}$$
-,where $\boldsymbol{\Sigma}_{1,1}, \mathbf{D}_{1}$ is a $2\times2$ matrix. From $\mathbf{D}_1=\mathbf{\Sigma_{1,1}}$, $\mathbf{M}=\mathbf{R}\mathbf{D}_1^{-1}$, $\mathbf{\hat{D}}=\hat{\boldsymbol{\Sigma}}-\mathbf{M}\mathbf{D}_1\mathbf{M}^T$, we can obtain bivariate LDL decomposition of $\boldsymbol{\Sigma}$ inductively.\\
+,where $\boldsymbol{\Sigma}_{1,1}, \mathbf{D}_{1}$ is a $2\times2$ matrix. From $\mathbf{D}_1=\boldsymbol{\Sigma_{1,1}}$, $\mathbf{M}=\mathbf{R}\mathbf{D}_1^{-1}$, $\mathbf{\hat{D}}=\hat{\boldsymbol{\Sigma}}-\mathbf{M}\mathbf{D}_1\mathbf{M}^T$, we can obtain bivariate LDL decomposition of $\boldsymbol{\Sigma}$ inductively.\\
 With transformation $\mathbf{y}=L\mathbf{x}$, $\mathbf{a}\leq\mathbf{x}\leq\mathbf{b}$ is tranformed to $a_j-\sum_{m=1}^{j-1}l_{jm}x_m=\alpha_j\leq x_j\leq b_j-\sum_{m=1}^{j-1}l_{jm}x_m=\beta_j$ for $j=1,\cdots,n$. Then, with $k=\frac{n}{2}$ and $\mathbf{x}_{2k}=(x_{2k-1},x_{2k})^T$
 \begin{align}\label{eqn:phi_cond-biv}
 	\boldsymbol{\Phi}_n(\mathbf{a},\mathbf{b};\mathbf{0},\boldsymbol{\Sigma})
@@ -24,7 +24,7 @@ With transformation $\mathbf{y}=L\mathbf{x}$, $\mathbf{a}\leq\mathbf{x}\leq\math
 \begin{algorithm}[H]
 	\caption{LDL decomposition}
 	\begin{algorithmic}[1]
-		\Procedure{\texttt{LDL}}{$\Sigma$}
+		\Procedure{\texttt{LDL}}{$\boldsymbol{\Sigma}$}
 		\State $\mathbf{L} \leftarrow \mathbf{I}_m, \mathbf{D} \leftarrow \mathbf{O}_m$
 		\For{$i = 1:d:m-d+1$}
 		\State $\mathbf{D}[i:i+d-1,i:i+d-1] \leftarrow \boldsymbol{\Sigma}[i:i+d-1,i:i+d-1]$
