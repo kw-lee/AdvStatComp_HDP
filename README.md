@@ -1,11 +1,5 @@
 # Hierarchical-block conditioning approximations for high-dimensional multivariate normal probabilities
 
-## Todo
-
-* Test `HCMVN()` for simulation
-* Impelent `HRCMVN()` for simulation
-* Implemnt block ordering
-
 ## Authors
 
 * Hyunseok Yang (@YangHS329)
@@ -13,6 +7,9 @@
 * Songhyun Kim (@than0you)
 
 All members are affiliated with Departments of Statistics, Seoul National University.
+
+## Report
+Report is in ```final``` folder
 
 ## Description
 
