@@ -1,62 +1,178 @@
-\section{Results}
+\section{Numerical Examples}
 
-\subsection{Data}
-% 7. Simulation - generate문단은 송현, 
+In this section, we show you the results of implementing and experimenting with the methods described above. The implementation was done in julia=1.2.0. Code is made available in the github repository\footnote{\url{https://github.com/kw-lee/AdvStatComp_HDP}}.
 
-% 나머지는 결과 나오면 body맞춰서 알아서 채워넣기 MVN, CMVN, RCMVN, HCMVN, Block Reordering
+\subsection{Cholesky Factorization}
 
-% MVN - 경원
-% CMVN/RCMVN - 송현 (table 2)
+The \textit{chol} function from \textbf{LinearAlgebra} package, the \textit{dpotrf} from \textbf{LAPACK} package, and hierarchical cholesky decomposition which suggested by \citet{hackbusch2015hierarchical} are implemented. Exponential covariance matrix, $\boldsymbol{\Sigma}_{ij}=exp(-\lVert \mathbf{s}_i-\mathbf{s}_j \rVert/\beta)$ is set with $\beta=0.3$. $n$ points, $\mathbf{s}_1,\cdots,\mathbf{s}_n$ is evenly distributed over unique square with Morton's order which defined recursively as described in figure \ref{fig:morton}.
+
+\begin{figure}[h]
+\centering
+	\includegraphics[width=.5\linewidth]{figs/Morton.jpg}
+	\caption{Morton's order\citep{salem2016comparative}}
+	\label{fig:morton}
+\end{figure}
+
+With various $n$, three Cholesky methods are applied and results are below table \ref{tab:table1}. In low rank approximation at algorithm \ref{alg:hchol}, rank is about $n^{1/4}$.
+
+\begin{table}[h]
+	\centering
+	% \resizebox{.6\textwidth}{!}{%
+	{
+		\begin{tabular}{@{}ccccc@{}}
+			\toprule
+			n & 256 & 1024 & 4096 & 16384 \\ \midrule
+			chol & 0.001s & 0.0097s & 0.414s & 156.3s \\
+			dpotrf & 0.0007s & 0.0132s & 0.431s & 154.1s \\
+			hierarchical cholesky & 0.153s & 0.076s & 0.916s & 37.3s \\
+			Error of hierarchical cholesky & 1.06e-7 & 9.97e-7 & 1.11e-3 & 1.87e-3 \\  \bottomrule
+		\end{tabular}%
+	}
+	\caption{}
+	\label{tab:table1}
+\end{table}
+Hierarchical cholesky decomposition is more efficient than other classical cholesky method with large dimension. Hierarchical cholesky decomposition provides $\boldsymbol{\Sigma}\approx L_HL_H^T$. Its relative error is defined as $\frac{\lVert\boldsymbol{\Sigma}-L_HL_H^T\rVert_2}{\lVert\boldsymbol{\Sigma}\rVert_2}$, and table \ref{tab:table1} ensures accuracy of hierarchical cholesky decomposition proposed by \citet{hackbusch2015hierarchical}.
+
+
+\subsection{Multivariate Normal Probabilities} 
+
+To implement \texttt{*MVN} functions, we need to calculate $n$-dimensional normal probability \eqref{eqn:normalprob},
+$$
+\Phi_n(a, b; 0, \boldsymbol{\Sigma}) = \int_a^b \frac{1}{\sqrt{(2\pi)^n |\boldsymbol{\Sigma}|}} \exp\left( -\frac{1}{2} \mathbf{x}^T \boldsymbol{\Sigma}^{-1} \mathbf{x} \right) d\mathbf{x},
+$$ 
+numerically. We implement \texttt{mvn}, the function that calculate multivariate normal probabilities using Richtmyer Quasi-Monte Carlo(QMC) method proposed by \citet{genz2009computation}. It is well-known that QMC methods is more effective than classical Monte Carlo(MC) method. Varying sample size $N$ and dimension $d$, two Monte Carlo methods are compared and results are below table \ref{tab:qmc_vs_mc}. We generate $N$ samples from $N(0, I_d)$ and set $\mathbf{a}_i = -\infty$ and $\mathbf{b}_i = 0$, i.e. true probabilities are $1/2^d$s, and repeat 20 times. Relative errors and computation times of each method are formulated.
+
+\begin{table}[h]
+	\centering
+	% \resizebox{.6\textwidth}{!}{%
+	{
+		\begin{tabular}{@{}cccccc@{}}
+			\toprule
+			$(n, d)$ 				  & 4 		& 8 	  & 12 		& 16 	  & 20	 \\ \midrule
+			\multicolumn{6}{l}{Classical Monte Carlo} \\ \midrule
+			\multirow{2}{*}{500}  & 12.2\%  & 56.8\%  & 161.9\% & 100.0\% & 100.0\% \\
+								  & 0.294ms & 0.016ms & 0.018ms & 0.019ms & 0.019ms \\
+			\multirow{2}{*}{1000} & 9.5\%   & 50.6\%  & 193.8\% & 100.0\% & 100.0\% \\
+								  & 0.046ms & 0.041ms & 0.028ms & 0.028ms & 0.034ms \\
+			\multirow{2}{*}{1500} & 8.9\%   & 38.7\%  & 150.2\% & 100.0\% & 100.0\% \\
+								  & 0.055ms & 0.046ms & 0.042ms & 0.048ms & 0.045ms \\
+			\multirow{2}{*}{2000} & 5.4\%   & 26.5\%  & 102.4\% & 100.0\% & 100.0\% \\
+								  & 0.070ms & 0.065ms & 0.072ms & 0.058ms & 0.055ms \\
+			\multirow{2}{*}{2500} & 5.1\%   & 32.0\%  & 100.1\% & 100.0\% & 100.0\% \\
+								  & 0.073ms & 0.092ms & 0.081ms & 0.083ms & 0.076ms \\ \midrule
+			\multicolumn{6}{l}{Richtmyer Quasi-Monte Carlo} \\ \midrule
+			\multirow{2}{*}{500}  & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\% \\
+							      & 0.058ms & 0.003ms & 0.006ms & 0.006ms & 0.011ms \\
+			\multirow{2}{*}{1000} & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\% \\
+						          & 0.003ms & 0.009ms & 0.013ms & 0.017ms & 0.020ms \\
+			\multirow{2}{*}{1500} & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\% \\
+						          & 0.006ms & 0.011ms & 0.016ms & 0.019ms & 0.030ms \\
+			\multirow{2}{*}{2000} & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\% \\
+						          & 0.011ms & 0.012ms & 0.013ms & 0.025ms & 0.036ms \\
+			\multirow{2}{*}{2500} & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\% \\
+						          & 0.009ms & 0.022ms & 0.033ms & 0.038ms & 0.056ms \\ \bottomrule
+		\end{tabular}%
+	}
+	\caption{Richtmyer Quasi-Monte Carlo and classical Monte Carlo}
+	\label{tab:qmc_vs_mc}
+\end{table}
+
+Note QMC is superior to MC in every criterion. All the multivariate normal distribution probabilities required in the next algorithms are calculated using the \texttt{mvn} function.
+
+\subsection{d-dimensional Conditioning Algorithm without/with Reordering}
+
+Haar distribution is defined with a uniform distribution in the unitary $N\times N$ matrices group, $U(N)$.
+\citet{stewart1980efficient} provides how to sample from Haar distribution with theorem \ref{thm:haar}
+
+\begin{theorem}\label{thm:haar}\citet{stewart1980efficient}
+	Let the independent vectors $x_1,\cdots,x_{n}$ be distributed $N(0,\sigma^2 \mathbf{I})$. For $j=1,2,\cdots,n-1$, let $\mathbf{\bar{H}}_{x_j}$ be the Householder transformation that reduces $x_j$ to $r_{jj}e_1$, where $r_{ij}$ is obtained in QR decomposition of $[x_1,\cdots,x_n]$ Let $\mathbf{H}_j=diag(\mathbf{I}_{j-1},\bar{\mathbf{H}}_j)$. Let $\mathbf{D}=diag(sign(r_{11}), \cdots, sign(r_{nn}))$. Then the product $\mathbf{Q}=\mathbf{DH_1\cdots H_{n-1}}$ follows Haar Distribution.
+\end{theorem}
+
+We simulates 250 MVN problems with various values of $m$ and $d$. $\boldsymbol{\Sigma}=\mathbf{Q}\mathbf{J}\mathbf{Q}^T$ is simulated with $\mathbf{Q}\sim{Haar distribution}$ and $J=diag(j_i)$ where $j_1,\cdots,j_m\sim U(0,1)$. Integration limits $a_i=-\infty$ and $b_i\sim(U,m)$ for $i=1\cdots,m$ are chosen. Estimated value is compared with approximated value obtained via quasi monte carlo method with a sample size of $10^4$, which ensures error below $10^{-4}$, and relative error and spent time is formulated below.
+
+\begin{table}[h]
+	\centering
+	% \resizebox{.6\textwidth}{!}{%
+	{
+		\begin{tabular}{@{}cccccc@{}}
+			\toprule
+			$(m, d)$ & 1 & 2 & 4 & 8 & 16 \\ \midrule
+			\multicolumn{6}{l}{Without univariate reordering} \\ \midrule
+			\multirow{2}{*}{16} & 3.7\% & 3.5\% & 3.6\% & 3.8\% & 2.9\% \\
+			& 0.029ms & 0.201ms & 0.431ms & 0.676ms & 1.372ms \\
+			\multirow{2}{*}{32} & 2.4\% & 2.9\% & 2.9\% & 3.3\% & 2.7\% \\
+			& 0.001ms & 0.390ms & 0.833ms & 1.283ms & 2.545ms \\
+			\multirow{2}{*}{64} & 1.9\% & 2.1\% & 2.1\% & 1.8\% & 1.9\% \\
+			& 0.004ms & 0.762ms & 1.686ms & 2.545ms & 5.004ms \\
+			\multirow{2}{*}{128} & 1.3\% & 1.5\% & 1.3\% & 1.2\% & 1.4\% \\
+			& 0.024ms & 1.505ms & 3.333ms & 5.146ms & 10.548ms \\ \midrule
+			\multicolumn{6}{l}{With univariate reordering} \\ \midrule
+			\multirow{2}{*}{16} & 3.3\% & 3.1\% & 3.3\% & 3.6\% & 2.7\% \\
+			& 0.007ms & 0.203ms & 0.439ms & 0.680ms & 1.363ms \\
+			\multirow{2}{*}{32} & 2.3\% & 2.6\% & 2.6\% & 3.2\% & 2.6\% \\
+			& 0.004ms & 0.393ms & 0.841ms & 1.289ms & 2.544ms \\
+			\multirow{2}{*}{64} & 2.0\% & 2.1\% & 2.1\% & 1.9\% & 1.9\% \\
+			& 0.014ms & 0.773ms & 1.695ms & 2.552ms & 5.022ms \\
+			\multirow{2}{*}{128} & 1.2\% & 1.5\% & 1.4\% & 1.2\% & 1.4\% \\
+			& 0.097ms & 1.593ms & 3.462ms & 5.268ms & 10.7861ms \\ \bottomrule
+		\end{tabular}%
+	}
+	\caption{Errors and execution times of the d-dimensional conditioning method}
+	\label{tab:table2}
+\end{table}
+
+Estimation error tended to decrease as $d$ increases with each $m$ since lager $d$ implers less discarded correlation information. Spent time grows to a linear fashion with m while it grows exponentially with $d$.
+
+\subsection{Hierarchical-Block Approximations}
 % HCMVN - 경원 (table 3)
 % Block Reordering - 현석 (table 5, 6)
 
 
-\section{Block Reordering}
+In this section, we implement three methods in the section \ref{sec:hmvn} and compare theirs performance
+\begin{itemize}
+    \item M1, \texttt{HMVN()}: Calculate multivariate normal probabilities using hierarchical-block approximation
+    \item M2, \texttt{HCMVN()}: Calculate multivariate normal probabilities using hierarchical-block conditioning approximation
+    \item M3, \texttt{HRCMVN()}: Calculate multivariate normal probabilities using hierarchical-block conditioning approximation with univarite reordering
+\end{itemize}
 
-Summarizing the previous computations, the cdf value for $n$-dimensioned multivariate normal variable comprises of $m$ multiplications of $d$-dimensional integrals. The idea arose from the construction of hierarchical Cholesky decomposition of covariance matrix, which enables concentration of high correlation values in the block diagonal area. As a consequence, correlation within blocks(or, group of compositions) are high while correlation between blocks(between groups) are low. Recall the RCMVN algorithm(\ref{alg:CMVN}) : as computing each $d$-dimensional integral values, integration variables were arranged in order of increasing order of CMVN probability values, from outer to inner. Trinh and Genz (2015) discovered that this reordering improves overall accuracy. In this sense, the authors adopted block reordering procedure. Briefly speaking, this procedure permutes the block of LDL-decomposed covariance matrix, in order of RCMVN probability values of each blocks. On the top left corner, the block with minimal probability value get its place. The block reordering algorithm introduced in the paper is as following:\\
+We use 20 as the sample size instead of 250 as in Table \ref{tab:table2} because the covariance structure is ﬁxed, leading to a much smaller standard deviation for the estimators. We simulates two spatial problems with various values of $m$ and $n$
 
-% \begin{algorithm}[H]
-% 	\caption{d-dimensional conditioning algorithm with univariate reordering}
-	\begin{algorithmic}[1]
-% 		Blockreorder($G, \rho, a, b, m, ind$)}
-		
-		\STATE $G, \rho, a, b, m, ind$ given, $\mathbf{P}$ $\leftarrow$ $0$
-		\FOR{$i = 1:m:n-m+1$}
-		\STATE $\mathbf{s}$ $\leftarrow$ $ind[i:i+m-1]$
-		\STATE $\mathbf{A}$ $\leftarrow$ $\rho(G, \mathbf{s})$
-		\STATE $a'$ $\leftarrow$ $a[\mathbf{s}]$
-		\STATE $b'$ $\leftarrow$ $b[\mathbf{s}]$
-		\STATE $\mathbf{P}$ $\leftarrow$ $[\mathbf{P}, RCMVN(\mathbf{A},a',b',1).P]$
-		\ENDFOR
-		\STATE sort(ind, $\mathbf{P}$, m)
-		\STATE\RETURN ind
+\begin{enumerate}
+	\item Constant covariance matrix: $k(x_i, x_j) = \theta + (1-\theta)\delta_{ij}$ for some $|\theta| < 1$.
+	\item 1D exponential covariance matrix: $k(x_i, x_j) = \exp(-d_{ij}/\beta)$ for some $\beta > 0$, where $d_{ij}$ is the distance between $x_i$ and $x_j$.
+\end{enumerate}
 
-	\end{algorithmic}\label{alg:BR}
-% \end{algorithm}
-Here, sort function arranges elements in the vector 'ind' in an increasing order based on $\mathbf{P}$. Also, $G$ means the intrinsic geometry of data. In practice, we set the geometry as 2D isotropic exponential covariance model, assuming data observation occured in unit square grd, indices arranged based on Morton order of level 1. The paper implemented the comparison between computing HMVN, HCMVN, HRCMVN values with or without block reordering procedure. Commonly, block reordering procedure places on the way before implementing hierarchical decomposition. For example, one can derive the algorithms of HMVN, including block reordering procedure as following:\\ 
+We set the integration limits $a_i=-\infty$ and $b_i\sim(U,n)$ for $i=1\cdots,n$, $\theta=0.7$, and $\beta=10$ as in \citet{cao2019hierarchical}. Estimated value is compared with approximated value obtained via QMC with a sample size of $10^4$.
 
+% \begin{table}[h]
+% 	\centering
+% 	% \resizebox{.6\textwidth}{!}{%
+% 	{
+% 		\begin{tabular}{@{}cccccccccc@{}}
+% 			\toprule
+% 			$m$ 	& \multicolumn{3}{l}{16} & \multicolumn{3}{l}{32} & \multicolumn{3}{l}{64}  \\
+% 			$n$ 	& 256 & 512 & 1024 & 256 & 512 & 1024 & 256 & 512 & 1024 \\ \bottomrule
+			
+% 			\multicolumn{10}{l}{Constant covariance structure} \\ \midrule
 
-\begin{algorithmic}
-    % \Procedure{\texttt{HMVN}}{$a,~b,~\Sigma,~d$}
-        \STATE $\mathbf{x} \leftarrow \mathbf{0}$, $P \leftarrow 1$, ind $\leftarrow$ $[1,\dots, n]$
-        \STATE $[\mathbf{B}, \mathbf{UV}] \leftarrow$ \texttt{choldecomp\_hmatrix}$(\Sigma)$
-        \STATE $\mathbf{B} \leftarrow$ Blockreorder($G, \rho, a, b, m, ind$)
-        \FOR{$i = 1:r$}
-            \STATE $j \leftarrow (i-1)m$
-            \IF{$i>1$}
-                \STATE $o_r \leftarrow$ row offset of $\mathbf{U}_{i-1}\mathbf{V}_{i-1}^T$
-                \STATE $o_c \leftarrow$ column offset of $\mathbf{U}_{i-1}\mathbf{V}_{i-1}^T$
-                \STATE $l \leftarrow \dim(\mathbf{U}_{i-1}\mathbf{V}_{i-1}^T)$
-                \STATE $\mathbf{g} \leftarrow \mathbf{U}_{i-1}\mathbf{V}_{i-1}^T\mathbf{x}[o_c+1:o_c+l]$
-                \STATE $\mathbf{a}[o_r+1:o_r+l] = \mathbf{a}[o_r+1:o_r+l] - \mathbf{g}$
-                \STATE $\mathbf{b}[o_r+1:o_r+l] = \mathbf{a}[o_r+1:o_r+l] - \mathbf{g}$
-            \ENDIF
-            \STATE $\mathbf{a}_i \leftarrow \mathbf{a}[j+1:j+m]$
-            \STATE $\mathbf{b}_i \leftarrow \mathbf{b}[j+1:j+m]$
-            \STATE $P = P*\Phi_m(\mathbf{a}_i, \mathbf{b}_i; \mathbf{0}, \mathbf{B}_i\mathbf{B}_i^T)$
-            \STATE $\mathbf{x}[j+1:j+m] \leftarrow \mathbf{B}_{i}^{-1} \expt{\mathbf{X}_i}$
-        \ENDFOR
-    % \EndProcedure
-\end{algorithmic}\label{alg:hmvn}
+% 			\multirow{2}{*}{M1}
+% 			\multirow{2}{*}{M2} 
+% 			\multirow{2}{*}{M3}
+			
+% 			\multicolumn{10}{l}{1D exponential covariance matrix} \\ \midrule
 
-Block reordering aims for improving accuracy rather than shortening computation time. According to the simulation result introduced in the paper, the extra time used for running block reordering is relatively small compared with the total time costs. The table below displays the running time for block reordering procedure and its condition.\\
+% 			\multirow{2}{*}{M1} 
+% 			\multirow{2}{*}{M2} 
+% 			\multirow{2}{*}{M3}
+			
+% 			\bottomrule
+% 		\end{tabular}%
+% 	}
+% 	\caption{Errors and execution times under the constant covariance structure and 1D exponential covariance structure}
+% 	\label{tab:table3}
+% \end{table}
+
+Estimation error tended to decrease as $d$ increases with each $m$ since lager $d$ implers less discarded correlation information. Spent time grows to a linear fashion with m while it grows exponentially with $d$.
+
+\subsection{Block Reordering}
+% Block Reordering - 현석 (table 5, 6)

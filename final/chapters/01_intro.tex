@@ -3,10 +3,10 @@
 The computation of multivariate normal probability appears various fields. For instance, the inferences based on the central limit theorem, which holds when the sample size is large enough, is widely used in the social sciences and engineering as well as in the natural sciences. Recently, the dimensionality of data and models has been grown significantly, and in this respect, so does a need for the methodology to efficiently calculate high-dimensional multivariate normal probability.
 
 \citet{cao2019hierarchical} proposes new approaches to approximate high-dimensional multivariate normal probability 
-$$
-\Phi_n(a, b; 0, \Sigma) = \int_a^b \frac{1}{\sqrt{(2\pi)^n |\Sigma|}} \exp\left( -\frac{1}{2} \mathbf{x}^T \Sigma^{-1} \mathbf{x} \right) d\mathbf{x}
-$$
-using the hierarchical matrix $\mathcal{H}$ \citep{hackbusch2015hierarchical} for the covariance matrix $\Sigma$. The methods are based on two state-of-arts methods, among others, are the bivariate conditioning method \citep{trinh2015bivariate} and the hierarchical Quasi-Monte Carlo method \citep{genton2018hierarchical}. Specifically, \citet{cao2019hierarchical} generalize the bivariate conditioning method to a $d$-dimension and combine it with the hierarchical representation of the covariance matrix. 
+\begin{equation}\label{eqn:normalprob}
+    \Phi_n(\mathbf{a}, \mathbf{b}; 0, \boldsymbol{\Sigma}) = \int_a^b \frac{1}{\sqrt{(2\pi)^n  \boldsymbol{\Sigma}|}} \exp\left( -\frac{1}{2} \mathbf{x}^T \boldsymbol{\Sigma}^{-1} \mathbf{x} \right) d\mathbf{x},
+\end{equation}
+using the hierarchical matrix $\mathcal{H}$ \citep{hackbusch2015hierarchical} for the covariance matrix $\boldsymbol{\Sigma}$. The methods are based on two state-of-arts methods, among others, are the bivariate conditioning method \citep{trinh2015bivariate} and the hierarchical Quasi-Monte Carlo method \citep{genton2018hierarchical}. Specifically, \citet{cao2019hierarchical} generalize the bivariate conditioning method to a $d$-dimension and combine it with the hierarchical representation of the covariance matrix. 
 
 % 논문 intro 요약
 % cholesky

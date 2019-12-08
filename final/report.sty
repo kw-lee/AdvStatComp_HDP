@@ -22,6 +22,9 @@
 % \RequirePackage{romannum} % roman number
 \RequirePackage{setspace}
 \RequirePackage{subcaption}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 % \RequirePackage{indentfirst}
 % \RequirePackage{float}
 % \RequirePackage{tipa} %use textcorner
@@ -215,6 +218,20 @@
 \def\Det{\@ifstar{\oldDet}{\oldDet*}}
 \makeatother
 
+\makeatletter
+\def\thickhline{%
+  \noalign{\ifnum0=`}\fi\hrule \@height \thickarrayrulewidth \futurelet
+   \reserved@a\@xthickhline}
+\def\@xthickhline{\ifx\reserved@a\thickhline
+               \vskip\doublerulesep
+               \vskip-\thickarrayrulewidth
+             \fi
+      \ifnum0=`{\fi}}
+\makeatother
+
+\newlength{\thickarrayrulewidth}
+\setlength{\thickarrayrulewidth}{2\arrayrulewidth}
+
 \newcommand{\Natural}{\mathbb{N}}
 \newcommand{\real}{\mathbb{R}}
 \newcommand{\equid}{\stackrel{d}{\equiv}}
@@ -234,7 +251,7 @@
   \array{*\c@MaxMatrixCols c}}
 \makeatother
 
-\everymath{\displaystyle} % 모든 math를 displaystyle로! 짱좋아보인다.
+% \everymath{\displaystyle}
 
 \newcommand{\iid}{\stackrel{i.i.d.}{\sim}}
 \newcommand{\ind}{\stackrel{ind.}{\sim}}

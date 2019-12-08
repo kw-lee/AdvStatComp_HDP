@@ -50,3 +50,30 @@ function Σ_1d_generate(n::Int, β::T) where T>: AbstractFloat
     Σ_1d = Symmetric(Σ_1d)
     return Σ_1d
 end
+
+function morton(n::Int64)
+    if n == 1
+        return [1], [1]
+    end
+    a, b = morton(n÷2)
+    return vcat(a, a .+ n÷2, a, a .+ n÷2), vcat(b, b, b .+ n÷2, b .+ n÷2)
+end
+"""
+Exponential Covariance Matrix with β
+n points evenly distributed on a grid in the unit square and indexed with Morton's order
+"""
+function Σ_morton_generate(N::Int, β::T) where T>: AbstractFloat
+
+    n = Int(sqrt(N))
+    a, b = morton(n)
+    Σ = zeros(N, N)
+
+    for i in 1:N
+        for j in 1:N
+            Σ[i, j] = exp( -norm([a[i] - a[j], b[i] - b[j]], 2) / β)
+        end
+    end
+    
+    Σ = Symmetric(Σ)
+    return Σ
+end

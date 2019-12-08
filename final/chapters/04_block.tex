@@ -3,48 +3,51 @@
 
 Summarizing the previous computations, the cdf value for $n$-dimensioned multivariate normal variable comprises of $m$ multiplications of $d$-dimensional integrals. The idea arose from the construction of hierarchical Cholesky decomposition of covariance matrix, which enables concentration of high correlation values in the block diagonal area. As a consequence, correlation within blocks(or, group of compositions) are high while correlation between blocks(between groups) are low. Recall the RCMVN algorithm(\ref{alg:CMVN}) : as computing each $d$-dimensional integral values, integration variables were arranged in order of increasing order of CMVN probability values, from outer to inner. Trinh and Genz (2015) discovered that this reordering improves overall accuracy. In this sense, the authors adopted block reordering procedure. Briefly speaking, this procedure permutes the block of LDL-decomposed covariance matrix, in order of RCMVN probability values of each blocks. On the top left corner, the block with minimal probability value get its place. The block reordering algorithm introduced in the paper is as following:\\
 
-% \begin{algorithm}[H]
-% 	\caption{d-dimensional conditioning algorithm with univariate reordering}
+\begin{algorithm}[h]
+    \caption{Blockwise reordering}
 	\begin{algorithmic}[1]
-% 		Blockreorder($G, \rho, a, b, m, ind$)}
-		
-		\STATE $G, \rho, a, b, m, ind$ given, $\mathbf{P}$ $\leftarrow$ $0$
-		\FOR{$i = 1:m:n-m+1$}
-		\STATE $\mathbf{s}$ $\leftarrow$ $ind[i:i+m-1]$
-		\STATE $\mathbf{A}$ $\leftarrow$ $\rho(G, \mathbf{s})$
-		\STATE $a'$ $\leftarrow$ $a[\mathbf{s}]$
-		\STATE $b'$ $\leftarrow$ $b[\mathbf{s}]$
-		\STATE $\mathbf{P}$ $\leftarrow$ $[\mathbf{P}, RCMVN(\mathbf{A},a',b',1).P]$
-		\ENDFOR
-		\STATE sort(ind, $\mathbf{P}$, m)
-		\STATE\RETURN ind
+		\Procedure{\texttt{Blockreorder}}{$G, \rho, a, b, m, ind$}
+            \State $G, \rho, a, b, m, ind$ given, $\mathbf{P}$ $\leftarrow$ $0$
+            \For{$i = 1:m:n-m+1$}
+                \State $\mathbf{s}$ $\leftarrow$ $ind[i:i+m-1]$
+                \State $\mathbf{A}$ $\leftarrow$ $\rho(G, \mathbf{s})$
+                \State $a'$ $\leftarrow$ $a[\mathbf{s}]$
+                \State $b'$ $\leftarrow$ $b[\mathbf{s}]$
+                \State $\mathbf{P}$ $\leftarrow$ $[\mathbf{P}, RCMVN(\mathbf{A},a',b',1).P]$
+            \EndFor
+            \State sort(ind, $\mathbf{P}$, m)
+            \State \Return ind
+        \EndProcedure
+    \end{algorithmic}\label{alg:BR}
+\end{algorithm}
 
-	\end{algorithmic}\label{alg:BR}
-% \end{algorithm}
 Here, sort function arranges elements in the vector 'ind' in an increasing order based on $\mathbf{P}$. Also, $G$ means the intrinsic geometry of data. In practice, we set the geometry as 2D isotropic exponential covariance model, assuming data observation occured in unit square grd, indices arranged based on Morton order of level 1. The paper implemented the comparison between computing HMVN, HCMVN, HRCMVN values with or without block reordering procedure. Commonly, block reordering procedure places on the way before implementing hierarchical decomposition. For example, one can derive the algorithms of HMVN, including block reordering procedure as following:\\ 
 
 
-\begin{algorithmic}
-    % \Procedure{\texttt{HMVN}}{$a,~b,~\Sigma,~d$}
-        \STATE $\mathbf{x} \leftarrow \mathbf{0}$, $P \leftarrow 1$, ind $\leftarrow$ $[1,\dots, n]$
-        \STATE $[\mathbf{B}, \mathbf{UV}] \leftarrow$ \texttt{choldecomp\_hmatrix}$(\Sigma)$
-        \STATE $\mathbf{B} \leftarrow$ Blockreorder($G, \rho, a, b, m, ind$)
-        \FOR{$i = 1:r$}
-            \STATE $j \leftarrow (i-1)m$
-            \IF{$i>1$}
-                \STATE $o_r \leftarrow$ row offset of $\mathbf{U}_{i-1}\mathbf{V}_{i-1}^T$
-                \STATE $o_c \leftarrow$ column offset of $\mathbf{U}_{i-1}\mathbf{V}_{i-1}^T$
-                \STATE $l \leftarrow \dim(\mathbf{U}_{i-1}\mathbf{V}_{i-1}^T)$
-                \STATE $\mathbf{g} \leftarrow \mathbf{U}_{i-1}\mathbf{V}_{i-1}^T\mathbf{x}[o_c+1:o_c+l]$
-                \STATE $\mathbf{a}[o_r+1:o_r+l] = \mathbf{a}[o_r+1:o_r+l] - \mathbf{g}$
-                \STATE $\mathbf{b}[o_r+1:o_r+l] = \mathbf{a}[o_r+1:o_r+l] - \mathbf{g}$
-            \ENDIF
-            \STATE $\mathbf{a}_i \leftarrow \mathbf{a}[j+1:j+m]$
-            \STATE $\mathbf{b}_i \leftarrow \mathbf{b}[j+1:j+m]$
-            \STATE $P = P*\Phi_m(\mathbf{a}_i, \mathbf{b}_i; \mathbf{0}, \mathbf{B}_i\mathbf{B}_i^T)$
-            \STATE $\mathbf{x}[j+1:j+m] \leftarrow \mathbf{B}_{i}^{-1} \expt{\mathbf{X}_i}$
-        \ENDFOR
-    % \EndProcedure
-\end{algorithmic}\label{alg:hmvn}
+\begin{algorithm}[h]
+    \caption{Hierarchical-block conditioning algorithm with Block Reordering}
+    \begin{algorithmic}
+        \Procedure{\texttt{HCMVN\_BRO}}{$a,~b,~\Sigma,~d$}
+            \State $\mathbf{x} \leftarrow \mathbf{0}$, $P \leftarrow 1$, ind $\leftarrow$ $[1,\dots, n]$
+            \State $[\mathbf{B}, \mathbf{UV}] \leftarrow$ \texttt{choldecomp\_hmatrix}$(\Sigma)$
+            \State $\mathbf{B} \leftarrow$ \texttt{Blockreorder}($G, \rho, a, b, m, ind$)
+            \For{$i = 1:r$}
+                \State $j \leftarrow (i-1)m$
+                \If{$i>1$}
+                    \State $o_r \leftarrow$ row offset of $\mathbf{U}_{i-1}\mathbf{V}_{i-1}^T$
+                    \State $o_c \leftarrow$ column offset of $\mathbf{U}_{i-1}\mathbf{V}_{i-1}^T$
+                    \State $l \leftarrow \dim(\mathbf{U}_{i-1}\mathbf{V}_{i-1}^T)$
+                    \State $\mathbf{g} \leftarrow \mathbf{U}_{i-1}\mathbf{V}_{i-1}^T\mathbf{x}[o_c+1:o_c+l]$
+                    \State $\mathbf{a}[o_r+1:o_r+l] = \mathbf{a}[o_r+1:o_r+l] - \mathbf{g}$
+                    \State $\mathbf{b}[o_r+1:o_r+l] = \mathbf{a}[o_r+1:o_r+l] - \mathbf{g}$
+                \EndIf
+                \State $\mathbf{a}_i \leftarrow \mathbf{a}[j+1:j+m]$
+                \State $\mathbf{b}_i \leftarrow \mathbf{b}[j+1:j+m]$
+                \State $P = P*\Phi_m(\mathbf{a}_i, \mathbf{b}_i; \mathbf{0}, \mathbf{B}_i\mathbf{B}_i^T)$
+                \State $\mathbf{x}[j+1:j+m] \leftarrow \mathbf{B}_{i}^{-1} \expt{\mathbf{X}_i}$
+            \EndFor
+        \EndProcedure
+    \end{algorithmic}\label{alg:hmvn_bro}
+\end{algorithm}
 
-Block reordering aims for improving accuracy rather than shortening computation time. According to the simulation result introduced in the paper, the extra time used for running block reordering is relatively small compared with the total time costs. The table below displays the running time for block reordering procedure and its condition.\\
+Block reordering aims for improving accuracy rather than shortening computation time. According to the simulation result introduced in the paper, the extra time used for running block reordering is relatively small compared with the total time costs. The table below displays the running time for block reordering procedure and its condition.
