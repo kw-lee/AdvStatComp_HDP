@@ -1,5 +1,7 @@
 \section{Numerical Examples}
 
+\subsection{Cholesky Factorization}
+
 \begin{frame}{Cholesky Factorization}
 \footnotesize
 
@@ -45,10 +47,76 @@ With various $n$, three Cholesky methods are applied and results are below table
 \end{itemize}
 \end{frame}
 
+\subsection{Multidimensional Conditioning Approximations}
+
 \begin{frame}{Multivariate Normal Probabilities} 
+
+	\begin{itemize}
+		\item We implement \texttt{mvn}, the function that calculate multivariate normal probabilities using Richtmyer QMC method introduced in subsection \ref{subsec:qmc}. 
+		\item Varying sample size $N$ and dimension $d$, two Monte Carlo methods are compared and results are below table \ref{tab:results_mc} and \ref{tab:results_qmc}. 
+		\item We generate $N$ samples from $N(0, I_d)$ and set $\mathbf{a}_i = -\infty$ and $\mathbf{b}_i = 0$, i.e. true probabilities are $1/2^d$s, and repeat 20 times. 
+		\item To summarize the results, QMC is superior to MC in every criterion. 
+		% \item All the multivariate normal distribution probabilities required in the next algorithms are calculated using the \texttt{mvn} function.
+	\end{itemize}
+
 \end{frame}
 	
+\begin{frame}{Multivariate Normal Probabilities} 
 	
+	\begin{table}[!h]
+		\centering
+		% \resizebox{.6\textwidth}{!}{%
+		{
+			\begin{tabular}{@{}cccccc@{}}
+				\toprule
+				$(n, d)$ 				  & 4 		& 8 	  & 12 		& 16 	  & 20	 \\ \midrule
+				\multirow{2}{*}{500}  & 12.2\%  & 56.8\%  & 161.9\% & 100.0\% & 100.0\% \\
+									  & 0.294ms & 0.016ms & 0.018ms & 0.019ms & 0.019ms \\
+				\multirow{2}{*}{1000} & 9.5\%   & 50.6\%  & 193.8\% & 100.0\% & 100.0\% \\
+									  & 0.046ms & 0.041ms & 0.028ms & 0.028ms & 0.034ms \\
+				\multirow{2}{*}{1500} & 8.9\%   & 38.7\%  & 150.2\% & 100.0\% & 100.0\% \\
+									  & 0.055ms & 0.046ms & 0.042ms & 0.048ms & 0.045ms \\
+				\multirow{2}{*}{2000} & 5.4\%   & 26.5\%  & 102.4\% & 100.0\% & 100.0\% \\
+									  & 0.070ms & 0.065ms & 0.072ms & 0.058ms & 0.055ms \\
+				\multirow{2}{*}{2500} & 5.1\%   & 32.0\%  & 100.1\% & 100.0\% & 100.0\% \\
+									  & 0.073ms & 0.092ms & 0.081ms & 0.083ms & 0.076ms \\
+				\bottomrule
+			\end{tabular}%
+		}
+		\caption{Results for the classical Monte Carlo}
+		\label{tab:results_mc}
+	\end{table}	
+
+\end{frame}
+
+\begin{frame}{Multivariate Normal Probabilities} 
+	\begin{table}[!h]
+		\centering
+		% \resizebox{.6\textwidth}{!}{%
+		{
+			\begin{tabular}{@{}cccccc@{}}
+				\toprule
+				$(n, d)$ 				  & 4 		& 8 	  & 12 		& 16 	  & 20	 \\ \midrule
+				\multirow{2}{*}{500}  & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\% \\
+									& 0.058ms & 0.003ms & 0.006ms & 0.006ms & 0.011ms \\
+				\multirow{2}{*}{1000} & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\% \\
+									& 0.003ms & 0.009ms & 0.013ms & 0.017ms & 0.020ms \\
+				\multirow{2}{*}{1500} & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\% \\
+									& 0.006ms & 0.011ms & 0.016ms & 0.019ms & 0.030ms \\
+				\multirow{2}{*}{2000} & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\% \\
+									& 0.011ms & 0.012ms & 0.013ms & 0.025ms & 0.036ms \\
+				\multirow{2}{*}{2500} & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\% \\
+									& 0.009ms & 0.022ms & 0.033ms & 0.038ms & 0.056ms \\ \bottomrule
+			\end{tabular}%
+		}
+		\caption{Results for the Richtmyer Quasi-Monte Carlo}
+		\label{tab:results_qmc}
+	\end{table}
+	
+	% 100%는 sampling이 아예 안되서 발생
+	% 0%는 너무 잘맞춰서;;
+
+\end{frame}
 	
 \begin{frame}{d-dimensional Conditioning Algorithm without/with Reordering}
 \footnotesize
@@ -102,4 +170,100 @@ With various $n$, three Cholesky methods are applied and results are below table
 \end{table}
 \footnotesize
 Estimation error tended to decrease as $d$ increases with each $m$ since lager $d$ implers less discarded correlation information. Spent time grows to a linear fashion with m while it grows exponentially with $d$.
+\end{frame}
+
+\subsection{Hierarchical-Block Approximations}
+
+\begin{frame}{\subsecname}
+
+	\begin{block}{Methods}
+		\begin{itemize}
+			\item M1, \texttt{HMVN()}: Calculate multivariate normal probabilities using hierarchical-block approximation
+			\item M2, \texttt{HCMVN()}: Calculate multivariate normal probabilities using hierarchical-block conditioning approximation
+			\item M3, \texttt{HRCMVN()}: Calculate multivariate normal probabilities using hierarchical-block conditioning approximation with univarite reordering
+		\end{itemize}
+	\end{block}
+
+	\begin{block}{Data}
+		\begin{enumerate}
+			\item Constant covariance matrix: $k(x_i, x_j) = \theta + (1-\theta)\delta_{ij}$ for some $|\theta| < 1$.
+			\item 1D exponential covariance matrix: $k(x_i, x_j) = \exp(-d_{ij}/\beta)$ for some $\beta > 0$, where $d_{ij}$ is the distance between $x_i$ and $x_j$.
+		\end{enumerate}
+	\end{block}
+
+\end{frame}
+
+\begin{frame}{\subsecname}
+
+	\begin{block}{Settings}
+		\begin{itemize}
+			\item Simulation size = 20
+			\item Integration limits $a_i=-\infty$ and $b_i\sim(U,n)$ for $i=1\cdots,n$
+			\item $\theta=0.7$, $d_{ij} = 1$, and $\beta=10$ as in \citet{cao2019hierarchical}
+			\item Fix $d=4$ for \texttt{HCMVN} and \texttt{HRCMVN}.
+		\end{itemize}
+	\end{block}
+
+	Table \ref{tab:table3}, Figure \ref{fig:table3_htime} and \ref{fig:table3_hctime} are errors and execution times under the constant covariance structure and 1D exponential covariance structure respectively. 
+\end{frame}
+
+\begin{frame}{\subsecname}
+
+	\begin{table}[!h]
+		\centering	
+		\resizebox{\textwidth}{!}{
+			\begin{tabular}{@{}llllllllll@{}}
+				\toprule
+				$m$ 	& \multicolumn{3}{l}{16} & \multicolumn{3}{l}{32} & \multicolumn{3}{l}{64}  \\
+				$n$ 	& 256 & 512 & 1024 & 256 & 512 & 1024 & 256 & 512 & 1024 \\ \bottomrule
+				
+				\multicolumn{10}{l}{Constant covariance structure} \\ \midrule
+	
+				M1 & 8.22\% & 7.11\% & 8.66\% & 8.94\% & 7.88\% & 6.68\% & 10.58\% & 8.05\% & 9.78\% \\
+				M2 & 8.37\% & 7.08\% & 8.60\% & 8.91\% & 7.77\% & 6.61\% & 10.58\% & 8.26\% & 9.91\% \\
+				M3 & 8.51\% & 7.10\% & 8.70\% & 9.51\% & 7.92\% & 7.00\% & 10.68\% & 7.94\% & 9.63\% \\
+	
+				\midrule
+				
+				\multicolumn{10}{l}{1D exponential covariance matrix} \\ \midrule
+	
+				M1 & 2.87\% & 0.00\% & 0.01\% & 0.07\% & 1.31\% & 0.00\% & 2.65\% & 0.27\% & 0.57\% \\
+				M2 & 3.28\% & 0.01\% & 0.90\% & 0.07\% & 1.31\% & 0.01\% & 2.65\% & 0.28\% & 0.57\% \\
+				M3 & 4.73\% & 0.09\% & 2.11\% & 2.17\% & 1.90\% & 0.16\% & 3.72\% & 1.25\% & 0.66\% \\
+					
+				\bottomrule
+			\end{tabular}%
+		}
+		\caption{Relative errors under the constant covariance structure and 1D exponential covariance structure}
+		\label{tab:table3}
+	\end{table}
+	
+\end{frame}
+
+\begin{frame}[allowframebreaks]{\subsecname - Execution Time}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\linewidth]{figs/table3_m1.pdf}
+		\caption{Execution time (seconds) for the hierarchical-block approximation}\label{fig:table3_htime}
+	\end{figure}
+
+	\framebreak
+
+	\begin{figure}
+		\centering
+				\begin{subfigure}[b]{0.45\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{figs/table3_m2.pdf}
+						\caption{\texttt{HCMVN}}
+				\end{subfigure}\hfill
+				\begin{subfigure}[b]{0.45\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{figs/table3_m3.pdf}
+						\caption{\texttt{HRCMVN}}
+				\end{subfigure}
+		\caption{Execution time (seconds) for the hierarchical-block conditioning approximation}\label{fig:table3_hctime}
+	\end{figure}	
+
+	The excution times of \texttt{HCMVN} and \texttt{HRCMVN} are significantly smaller than of \texttt{HMVN} even their performances are similar 
+	
 \end{frame}
