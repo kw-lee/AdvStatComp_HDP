@@ -62,15 +62,18 @@ end
 Exponential Covariance Matrix with β
 n points evenly distributed on a grid in the unit square and indexed with Morton's order
 """
-function Σ_morton_generate(n::Int, β::T) where T>: AbstractFloat
-    a, b = morton(n)7
+function Σ_morton_generate(N::Int, β::T) where T>: AbstractFloat
+
+    n = Int(sqrt(N))
+    a, b = morton(n)
+    Σ = zeros(N, N)
+
     for i in 1:N
         for j in 1:N
             Σ[i, j] = exp( -norm([a[i] - a[j], b[i] - b[j]], 2) / β)
         end
     end
+    
     Σ = Symmetric(Σ)
     return Σ
 end
-
-

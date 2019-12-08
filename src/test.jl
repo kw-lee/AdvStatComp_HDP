@@ -14,7 +14,7 @@ A = A'A
 A = Symmetric(A)
 m = 2
 B, UV = hchol(A, m)
-displayTree(UV)
+# displayTree(UV)
 
 L = uncompress(B, UV)
 @assert A ≈ L*L'
