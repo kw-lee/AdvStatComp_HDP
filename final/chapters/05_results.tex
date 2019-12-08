@@ -127,7 +127,6 @@ Estimation error tended to decrease as $d$ increases with each $m$ since lager $
 % HCMVN - 경원 (table 3)
 % Block Reordering - 현석 (table 5, 6)
 
-
 In this section, we implement three methods in the section \ref{sec:hmvn} and compare theirs performance
 \begin{itemize}
     \item M1, \texttt{HMVN()}: Calculate multivariate normal probabilities using hierarchical-block approximation
@@ -135,44 +134,111 @@ In this section, we implement three methods in the section \ref{sec:hmvn} and co
     \item M3, \texttt{HRCMVN()}: Calculate multivariate normal probabilities using hierarchical-block conditioning approximation with univarite reordering
 \end{itemize}
 
-We use 20 as the sample size instead of 250 as in Table \ref{tab:table2} because the covariance structure is ﬁxed, leading to a much smaller standard deviation for the estimators. We simulates two spatial problems with various values of $m$ and $n$
+We use 20 as the sample size instead of 250 as in Table \ref{tab:table2} because the covariance structure is ﬁxed, leading to a much smaller standard deviation for the estimators. We simulates two spatial problems with various values of $m$ and $n$.
 
 \begin{enumerate}
 	\item Constant covariance matrix: $k(x_i, x_j) = \theta + (1-\theta)\delta_{ij}$ for some $|\theta| < 1$.
 	\item 1D exponential covariance matrix: $k(x_i, x_j) = \exp(-d_{ij}/\beta)$ for some $\beta > 0$, where $d_{ij}$ is the distance between $x_i$ and $x_j$.
 \end{enumerate}
 
-We set the integration limits $a_i=-\infty$ and $b_i\sim(U,n)$ for $i=1\cdots,n$, $\theta=0.7$, and $\beta=10$ as in \citet{cao2019hierarchical}. Estimated value is compared with approximated value obtained via QMC with a sample size of $10^4$.
+We set the integration limits $a_i=-\infty$ and $b_i\sim(U,n)$ for $i=1\cdots,n$, $\theta=0.7$, $d_{ij} = 1$, and $\beta=10$ as in \citet{cao2019hierarchical}. Estimated value is compared with approximated value obtained via QMC with a sample size of $10^4$. In this simulation, we fix $d=4$ for \texttt{HCMVN} and \texttt{HRCMVN}. Table \ref{tab:table3} and Figure \ref{fig:table3_time} are errors and execution times under the constant covariance structure and 1D exponential covariance structure respectively. 
 
-% \begin{table}[h]
-% 	\centering
-% 	% \resizebox{.6\textwidth}{!}{%
-% 	{
-% 		\begin{tabular}{@{}cccccccccc@{}}
-% 			\toprule
-% 			$m$ 	& \multicolumn{3}{l}{16} & \multicolumn{3}{l}{32} & \multicolumn{3}{l}{64}  \\
-% 			$n$ 	& 256 & 512 & 1024 & 256 & 512 & 1024 & 256 & 512 & 1024 \\ \bottomrule
+\begin{table}[h]
+	\centering
+	{
+		\begin{tabular}{@{}llllllllll@{}}
+			\toprule
+			$m$ 	& \multicolumn{3}{l}{16} & \multicolumn{3}{l}{32} & \multicolumn{3}{l}{64}  \\
+			$n$ 	& 256 & 512 & 1024 & 256 & 512 & 1024 & 256 & 512 & 1024 \\ \bottomrule
 			
-% 			\multicolumn{10}{l}{Constant covariance structure} \\ \midrule
+			\multicolumn{10}{l}{Constant covariance structure} \\ \midrule
 
-% 			\multirow{2}{*}{M1}
-% 			\multirow{2}{*}{M2} 
-% 			\multirow{2}{*}{M3}
+			M1 & 8.22\% & 7.11\% & 8.66\% & 8.94\% & 7.88\% & 6.68\% & 10.58\% & 8.05\% & 9.78\% \\
+			M2 & 8.37\% & 7.08\% & 8.60\% & 8.91\% & 7.77\% & 6.61\% & 10.58\% & 8.26\% & 9.91\% \\
+			M3 & 8.51\% & 7.10\% & 8.70\% & 9.51\% & 7.92\% & 7.00\% & 10.68\% & 7.94\% & 9.63\% \\
+
+			\midrule
 			
-% 			\multicolumn{10}{l}{1D exponential covariance matrix} \\ \midrule
+			\multicolumn{10}{l}{1D exponential covariance matrix} \\ \midrule
 
-% 			\multirow{2}{*}{M1} 
-% 			\multirow{2}{*}{M2} 
-% 			\multirow{2}{*}{M3}
+			M1 & 2.87\% & 0.00\% & 0.01\% & 0.07\% & 1.31\% & 0.00\% & 2.65\% & 0.27\% & 0.57\% \\
+			M2 & 3.28\% & 0.01\% & 0.90\% & 0.07\% & 1.31\% & 0.01\% & 2.65\% & 0.28\% & 0.57\% \\
+			M3 & 4.73\% & 0.09\% & 2.11\% & 2.17\% & 1.90\% & 0.16\% & 3.72\% & 1.25\% & 0.66\% \\
+				
+			\bottomrule
+		\end{tabular}%
+	}
+	\caption{Relative errors under the constant covariance structure and 1D exponential covariance structure}
+	\label{tab:table3}
+\end{table}
+
+\begin{figure}
+	\centering
+			\begin{subfigure}[b]{0.3\textwidth}
+					\centering
+					\includegraphics[width=\linewidth]{figs/table3_m1.pdf}
+					\caption{M1}
+			\end{subfigure}\hfill
+			\begin{subfigure}[b]{0.3\textwidth}
+					\centering
+					\includegraphics[width=\linewidth]{figs/table3_m2.pdf}
+					\caption{M2}
+			\end{subfigure}\hfill
+			\begin{subfigure}[b]{0.3\textwidth}
+					\centering
+					\includegraphics[width=\linewidth]{figs/table3_m3.pdf}
+					\caption{M3}
+			\end{subfigure}
+			\caption{Execution time (seconds) under the constant covariance structure and 1D exponential covariance structure}\label{fig:table3_time}
+\end{figure}	
+
+Note the excution times of M2 and M3 are significantly smaller than of M1 even their performances are similar.
+
+Next, we give simulation with a 2D exponential covariance matrix using morton's order for indexing the sample points on the plane. We fix $m = 8$ for the 2D covariance structure and examine the effectiveness of our algorithm varying $d =1,2,4$. To test the sensitivity with respect to the correlation strength, we perform the estimation under $\beta = 0.3, 0.1$, and 0.03, representing strong, medium, and weak correlation strengths. We set $n$ to 16, 64, 256 and other settings are same as above. Table \ref{tab:table5} presents the results.
+
+\begin{table}[h]
+	\centering
+	{
+		\begin{tabular}{@{}ccccccc@{}}
+			\toprule
+			$n$ & $compress$ & \texttt{mvn} & \texttt{HMVN} & $\texttt{HCMVN}_1$ & $\texttt{HCMVN}_2$ & $\texttt{HCMVN}_4$ \\ \midrule
+
 			
-% 			\bottomrule
-% 		\end{tabular}%
-% 	}
-% 	\caption{Errors and execution times under the constant covariance structure and 1D exponential covariance structure}
-% 	\label{tab:table3}
-% \end{table}
+			\multicolumn{7}{l}{$\beta=0.3$} \\ \midrule
+			16 & 0.89 & 0.00ppm & 53.68ppm & 2139.98ppm & 1723.46ppm & 276.37ppm \\ 
+			64 & 0.56 & 0.00ppm & 143.88ppm & 167.26ppm & 167.69ppm & 169.31ppm \\ 
+			256 & 0.28 & 0.00ppm & 215.10ppm & 213.41ppm & 213.41ppm & 213.41ppm \\ 
+			\midrule
+			\multicolumn{7}{l}{$\beta=0.1$} \\ \midrule
+			16 & 0.89 & 0.00ppm & 0.00ppm & 0.84ppm & 0.60ppm & 0.02ppm \\ 
+			64 & 0.56 & 0.00ppm & 0.00ppm & 1.61ppm & 0.09ppm & 0.01ppm \\ 
+			256 & 0.28 & 0.00ppm & 0.00ppm & 0.02ppm & 0.02ppm & 0.02ppm \\ 
+			\midrule
+			\multicolumn{7}{l}{$\beta=0.03$} \\ \midrule
+			16 & 0.89 & 0.00ppm & 0.00ppm & 0.00ppm & 0.00ppm & 0.00ppm \\ 
+			64 & 0.42 & 0.00ppm & 0.00ppm & 0.00ppm & 0.00ppm & 0.00ppm \\ 
+			256 & 0.20 & 0.00ppm & 0.00ppm & 0.00ppm & 0.00ppm & 0.00ppm \\ 
+			\bottomrule
+		\end{tabular}%
+	}
+	\caption{Relative errors and efficiency of the two-level hierarchical-block conditioning methods}
+	\label{tab:table5}
+\end{table}
 
-Estimation error tended to decrease as $d$ increases with each $m$ since lager $d$ implers less discarded correlation information. Spent time grows to a linear fashion with m while it grows exponentially with $d$.
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{figs/table5_time.pdf}
+	\caption{Execution time (seconds) under the constant covariance structure and 2D exponential covariance structure; solid line: $\beta=0.3$, dashed line: $\beta=0.1$, dotted line: $\beta=0.03$}\label{fig:table5_time}
+\end{figure}
 
-\subsection{Block Reordering}
+In Table \ref{tab:table5}, $\texttt{HCMVN}_d$ denotes \texttt{HCMVN} function with $d$ and  
+$$compress = \frac{\text{Total memory size of the } \mathcal{H} \text{ matrix}}{\text{Memory size of the covariance matrix } \boldsymbol{\Sigma}}.$$ 
+
+In this experiment, \citet{cao2019hierarchical} mentioned 
+\begin{quote}
+	It is worth mentioning that the correlation strength is essentially increased when $n$ increases while $\beta$ remains unchanged because the samples are from the unit hypercube. Also the increase of d will reduce the estimation error but is still unable to reach a satisfactory level. The method, when used without a reordering strategy, does not produce sufﬁciently accurate results. This motivated the development of the reordering strategy described in the next section
+\end{quote}
+with extremely large size simulation. But, in our experiment, this phenomenon could not be found due to restriction of the computing resource.
+
+% \subsection{Block Reordering}
 % Block Reordering - 현석 (table 5, 6)

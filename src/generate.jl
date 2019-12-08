@@ -58,11 +58,12 @@ function morton(n::Int64)
     a, b = morton(n÷2)
     return vcat(a, a .+ n÷2, a, a .+ n÷2), vcat(b, b, b .+ n÷2, b .+ n÷2)
 end
+
 """
 Exponential Covariance Matrix with β
 n points evenly distributed on a grid in the unit square and indexed with Morton's order
 """
-function Σ_morton_generate(N::Int, β::T) where T>: AbstractFloat
+function Σ_morton_generate(N::Int, β::T) where T<: AbstractFloat
 
     n = Int(sqrt(N))
     a, b = morton(n)
