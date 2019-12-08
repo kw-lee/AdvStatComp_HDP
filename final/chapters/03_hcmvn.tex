@@ -48,8 +48,7 @@ Note the probabilities $\Phi_m(\mathbf{a}_i, \mathbf{b}_i; \mathbf{0}, \mathbf{B
 \subsection{Computational Complexity}
 
 For a clearer comparison of the complexities, we decompose the complexity of Algorithm \ref{alg:hmvn} into three parts and list the complexity for each part in Table \ref{tbl:cc_hmvn}, where $M(\cdot)$ denotes the complexity of the QMC simulation in the given dimension. 
-Table \ref{tbl:cc_hmvn} shows that the time efﬁciency of the $d$-dimensional conditioning algorithm mainly comes from lowering the dimension in which the QMC simulation is performed. 
-
+%Table \ref{tbl:cc_hmvn} shows that the time efﬁciency of the $d$-dimensional conditioning algorithm mainly comes from lowering the dimension in which the QMC simulation is performed. 
 \renewcommand{\arraystretch}{1.5}
 \begin{table}[ht]
     \begin{center}
@@ -65,5 +64,6 @@ Table \ref{tbl:cc_hmvn} shows that the time efﬁciency of the $d$-dimensional c
     \end{center}
 \end{table}
 \renewcommand{\arraystretch}{1}
+
 
 The three parts of the complexity are the calculation of the MVN probability (MVN prob), the calculation of the truncated expectations (Trunc exp), and the update of the integration limits with truncated expectations (Upd limits). The latter two share the same asymptotic order in all three complexity terms. The updating cost is independent of the method. The complexity of the univariate reordering is $O(m^2 n)$, the same as the complexity of computing the MVN probabilities in \texttt{HCMVN}, resulting in an identical major complexity component for \texttt{HCMVN} and \texttt{HRCMVN}. Since \texttt{HCMVN} and \texttt{HRCMVN} perform the QMC  simulation in $d$-dimensions, these two methods are not greatly affected by the choice of $m$.
