@@ -1,40 +1,7 @@
 \section{Multidimensional Conditioning Approximations}
 
-\subsection{hierarchical cholesky decomposition}
-\citet{hackbusch2015hierarchical} proposed hiarchical matrix and its cholesky decomposition method. We have applied low rank approximation to each block of its decomposition to make implementation efficiently and save storage while accuracy is preserved.
-$A=LU$have the structure
-$$\begin{pmatrix}A_{11}&A_{12}\\A_{21}&A_{22}\end{pmatrix}=\begin{pmatrix}L_{11}&O\\L_{21}&L_{22}\end{pmatrix}\begin{pmatrix}L_{11}^T&L_{12}^2\\O&L_{22}\end{pmatrix}$$
-with lower triangular matrix $L_{11},L_{22}$.
-It leads to four tasks:
-\begin{itemize}
-	\item[(a)] compute $L_{11}$ via Cholesky decomposition of $A_{11}$
-	\item[(b)] compute $L_{12}$ from $L_{21}L_{11}^T = A_{21}$
-	\item[(c)] low rank approximation of $L_{12}=UV^T$
-	\item[(d)] compute $L_{22}$ via Cholesky decomposition of $A_{22}-L_{21}L_{21}^T$
-\end{itemize}
-(a) and (d) is solved with hierachical cholesky decomposition it self, and (b) is easy since it has triangular form. (c) is implemented with low-rank approximation of SVD, i.e. $A=UDV^T=\sum_{i=1}^n d_i u_iv_i^T=\sum_{i=1}^k d_i u_iv_i^T$.
-Hierachical cholesky decomposition of $n\times n$ matrix into $m\times m$ blocks is implemented like below.
-\begin{algorithm}[H]
-	\caption{Hierachical cholesky decomposition}
-	\begin{algorithmic}[1]
-		\Procedure{\texttt{hchol}}{$A$, n,m,rank}
-		\For{$i=1:log_2(\frac{n}{m})$}
-		\State $nb = n/2^i$
-		\State x = 0, y = nb
-		\For{$j=1:2^{i-1}$}
-		\State $\mathbf{U,D,V} = lowrankSVD(A[xbegin+1:xbegin+nb,ybegin+1:ybegin+nb], rank)$
-		\State $\mathbf{A}[x + 1:x + nb, y + 1:y + rank] = \mathbf{UD}$
-		\State $\mathbf{A}[x + 1:x + nb, y + rank+1:y + nb] = \mathbf{O}$
-		\State $\mathbf{A}[y + 1:y + nb, x + 1:x + rank] = \mathbf{VD}$
-		\State $\mathbf{A}[y + 1:y + nb, x + rank+1:x + nb] = \mathbf{O}$
-		\State $x += 2nb, y += 2nb$
-		\EndFor
-		\EndFor
-		\EndProcedure
-		
-	\end{algorithmic}\label{alg:hchol}
-\end{algorithm}
-\subsection{d-dimensional conditioning approximation}
+\subsection{Conditioning Approximation}
+
 We can exploit Cholesky factors from LDL decomposition rather than dealing with original covariance matrix. \citet{mendell1974multifactorial} and \citet{kamakura1989estimation} developed conditioning method to calculated cdf of multivariate truncated normal distribution. \citet{trinh2015bivariate} employ bivariate blocking method for efficient calculation while accuracy is preserved.\\
 $$\mathbf{\Sigma} = \begin{pmatrix}
 \mathbf{\Sigma}_{1,1} & \mathbf{R}^T\\
@@ -88,12 +55,12 @@ $$
 \end{pmatrix}
 $$
 with $d$-dimensional identitiy matrix $\mathbf{I}_d$ and $d$-dimensional zero matrix $\mathbf{O}_d$ and $d$-dimensional positive-definite matrix $\mathbf{D}_1,\cdots,\mathbf{D}_s$. Algorithm \ref{alg:LDL-d} is still valid when $m$ is not multiple of $d$ if we allow $\mathbf{L},\mathbf{D}$ to have non-$d$ dimensional matrix block as last row.\\
-As in \ref{eqn:phi_cond-biv}, tranformation, $Y=LX$ provides $m$-dimensional multivariate normal prabability as the product of s $d$-dimensional multivariate normal probabilities as below.
+As in \eqref{eqn:phi_cond-biv}, tranformation, $Y=LX$ provides $m$-dimensional multivariate normal prabability as the product of s $d$-dimensional multivariate normal probabilities as below.
 \begin{equation}\label{eqn::phi_cond-ddim}
 	\boldsymbol{\Phi_m}(\mathbf{a},\mathbf{b};\mathbf{0},\mathbf{\Sigma})=\int_{\mathbf{\alpha}_1}^{\mathbf{\beta}_1}\phi_d(\mathbf{y}_1;\mathbf{D}_1)\int_{\mathbf{\alpha}_2}^{\mathbf{\beta}_2}\phi_d(\mathbf{y}_2;\mathbf{D}_2)\cdots\int_{\mathbf{\alpha}_s}^{\mathbf{\beta}_s}\phi_d(\mathbf{y}_s;\mathbf{D}_s)d\mathbf{y}_s\cdots d\mathbf{y}_2d\mathbf{y}_1
 \end{equation}
 ,where $\boldsymbol{\alpha}_i=\mathbf{a}_i-\sum_{j=1}^{i-1}\mathbf{L}_{ij}\mathbf{y}_j, \boldsymbol{\beta}_i=\mathbf{b}_i-\sum_{j=1}^{i-1}\mathbf{L}_{ij}\mathbf{y}_j$
-Equation \ref{eqn::phi_cond-ddim} is implemented as below.
+Equation \eqref{eqn::phi_cond-ddim} is implemented as below.
 
 \begin{algorithm}[H]
 	\caption{d-dimensional conditioning algorithm}
@@ -114,7 +81,7 @@ Equation \ref{eqn::phi_cond-ddim} is implemented as below.
 	\end{algorithmic}\label{alg:CMVN}
 \end{algorithm}
 
-\subsection{d-dimensional truncated expectations}
+\subsection{Multidimensional Truncated Expectations}
 In algorithm \ref{alg:CMVN} needs approximation of $\boldsymbol{\Phi}_d$ and $E[Y^\prime]$. $\boldsymbol{\Phi}_d$ is possibly obtained with quasi monte calro method proposed by \citet{genz2009computation}, and \citet{kan2017moments} provides methods to calculate $E[Y^\prime]$. The truncated expectation is expressed as
 $$E(X^{e_j})=\frac{1}{\boldsymbol{\Phi}(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\mathbf{\Sigma})}\int_\mathbf{a}^\mathbf{b}x_j\phi_d(\mathbf{x};\boldsymbol{\mu},\mathbf{\Sigma})d\mathbf{x}=\frac{1}{\boldsymbol{\Phi}(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\mathbf{\Sigma})}F_j^d(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\mathbf{\Sigma})$$
 
@@ -134,7 +101,7 @@ c_l&=\phi_1(a_l;\mu_l,\sigma_l^2)\Phi_{d-1}(\mathbf{a}_{-l},\mathbf{b}_{-l};\bol
 	\begin{equation}\label{eqn:proof}
 	-\frac{\partial\phi_n(\mathbf{x};\boldsymbol{\mu},\mathbf{\Sigma})}{\partial\mathbf{x}}=\mathbf{\Sigma}^{-1}(\mathbf{x}-\mathbf{\mu})\phi_n(\mathbf{x};\boldsymbol{\mu},\mathbf{\Sigma})
 	\end{equation}
-	With integration \ref{eqn:proof} from $\mathbf{a}$ to $\mathbf{b}$,
+	With integration \eqref{eqn:proof} from $\mathbf{a}$ to $\mathbf{b}$,
 	\begin{equation}\label{eqn:proof2}
 	\boldsymbol{c}=\mathbf{\Sigma}^{-1}\begin{bmatrix}
 	F_1^d-\mu_1\Phi_{d-1}\\
@@ -148,7 +115,7 @@ c_l&=\phi_1(a_l;\mu_l,\sigma_l^2)\Phi_{d-1}(\mathbf{a}_{-l},\mathbf{b}_{-l};\bol
 	\phi_n(\mathbf{x};\boldsymbol{\mu},\mathbf{\Sigma})\vert_{x_j=a_j}&=\phi_1(a_j;\mu_j,\sigma_j^2)\phi_{n-1}(\mathbf{x}_{-j};\boldsymbol{\hat{\mu}}^1_j\mathbf{\hat{\Sigma}}^1)\\
 	\phi_n(\mathbf{x};\boldsymbol{\mu},\mathbf{\Sigma})\vert_{x_j=b_j}&=\phi_1(b_j;\mu_j,\sigma_j^2)\phi_{n-1}(\mathbf{x}_{-j};\boldsymbol{\hat{\mu}}^2_j\mathbf{\hat{\Sigma}}^1),
 	\end{aligned}$$
-	\ref{eqn:proof2} becomes
+	\eqref{eqn:proof2} becomes
 	$$\begin{aligned}
 	c_l&=\phi_1(a_l;\mu_l,\sigma_l^2)\Phi_{d-1}(\mathbf{a}_{-l},\mathbf{b}_{-l};\boldsymbol{\hat{\mu}}^1, \mathbf{\hat{\Sigma}}_l)\\
 	&-\phi_1(b_l;\mu_l,\sigma_l^2)\Phi_{d-1}(\mathbf{a}_{-l},\mathbf{b}_{-l};\boldsymbol{\hat{\mu}}^2, \mathbf{\hat{\Sigma}}_l)
@@ -156,7 +123,7 @@ c_l&=\phi_1(a_l;\mu_l,\sigma_l^2)\Phi_{d-1}(\mathbf{a}_{-l},\mathbf{b}_{-l};\bol
 \end{proof}
 Theorem \ref{thm:thmkan} has same form with bivariate version of \citet{trinh2015bivariate} with $d=2$ and it allows us to calculate $E[Y^\prime]$ in Algorithm \ref{alg:CMVN} with $\boldsymbol{\Phi}$ which can be obtained with quasi monte calro method proposed by \citet{genz2009computation}
 
-\subsection{RCMVN}
+\subsection{Multidimensional Conditioning Approximation with Univariate Reordering}
 It is known that appropriate integration order on conditioning algorithm possibly improves estiation accuracy. \citet{schervish1984algorithm} originally proposed integral with shortest integration interval widths be the outermost integration variables to reduce overall variation of integrand and \citet{gibson1994monte} suggested variables which have smallest expected values be the outermost integration variables. Since innermost integrals which have smaller variation have the most influence with this order, overall variance reduces.
 \citet{trinh2015bivariate} also employs this ordering, and \citet{cao2019hierarchical} generalized it to $d$-dimensional problem.
 \begin{algorithm}[H]

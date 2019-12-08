@@ -3,6 +3,7 @@
 In this section, we show you the results of implementing and experimenting with the methods described above. The implementation was done in julia=1.2.0. Code is made available in the github repository\footnote{\url{https://github.com/kw-lee/AdvStatComp_HDP}}.
 
 \subsection{Cholesky Factorization}
+
 The \textit{chol} function from \textbf{LinearAlgebra} package, the \textit{dpotrf} from \textbf{LAPACK} package, and hierarchical cholesky decomposition which suggested by \citet{hackbusch2015hierarchical} are implemented. Exponential covariance matrix, $\Sigma_{ij}=exp(-\lVert \mathbf{s}_i-\mathbf{s}_j \rVert/\beta)$ is set with $\beta=0.3$. $n$ points, $\mathbf{s}_1,\cdots,\mathbf{s}_n$ is evenly distributed over unique square with Morton's order which defined recursively as described in figure \ref{fig:morton}.
 
 \begin{figure}[h]

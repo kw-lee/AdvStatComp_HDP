@@ -1,11 +1,47 @@
 
 \section{Hierarchical-Block Approximations}\label{sec:hmvn}
 
+In this section, we suggest methods to solve the $n$-dimensional MVN problem with the hierarchical covariance matrix using the $d$-dimensional conditioning method with that of the Monte Carlo-based method for solving the $m$-dimensional MVN problems presented by the diagonal blocks.
 % 5. HCMVN - 경원 Hchol, CMVN, RCMVN, blocking
 
-\subsection{The Hierarchical-Block Conditioning Method}
+\subsection{Hierarchical Cholesky Decomposition}
 
-In this section, we suggest methods to solve the $n$-dimensional MVN problem with the hierarchical covariance matrix using the $d$-dimensional conditioning method with that of the Monte Carlo-based method for solving the $m$-dimensional MVN problems presented by the diagonal blocks.
+\citet{hackbusch2015hierarchical} proposed hiarchical matrix and its cholesky decomposition method. We have applied low rank approximation to each block of its decomposition to make implementation efficiently and save storage while accuracy is preserved.
+$A=LU$have the structure
+$$\begin{pmatrix}A_{11}&A_{12}\\A_{21}&A_{22}\end{pmatrix}=\begin{pmatrix}L_{11}&O\\L_{21}&L_{22}\end{pmatrix}\begin{pmatrix}L_{11}^T&L_{12}^2\\O&L_{22}\end{pmatrix}$$
+with lower triangular matrix $L_{11},L_{22}$.
+It leads to four tasks:
+\begin{itemize}
+	\item[(a)] compute $L_{11}$ via Cholesky decomposition of $A_{11}$
+	\item[(b)] compute $L_{12}$ from $L_{21}L_{11}^T = A_{21}$
+	\item[(c)] low rank approximation of $L_{12}=UV^T$
+	\item[(d)] compute $L_{22}$ via Cholesky decomposition of $A_{22}-L_{21}L_{21}^T$
+\end{itemize}
+(a) and (d) is solved with hierachical cholesky decomposition it self, and (b) is easy since it has triangular form. (c) is implemented with low-rank approximation of SVD, i.e. $A=UDV^T=\sum_{i=1}^n d_i u_iv_i^T=\sum_{i=1}^k d_i u_iv_i^T$.
+Hierachical cholesky decomposition of $n\times n$ matrix into $m\times m$ blocks is implemented like below.
+\begin{algorithm}[H]
+	\caption{Hierachical cholesky decomposition}
+	\begin{algorithmic}[1]
+		\Procedure{\texttt{hchol}}{$A$, n,m,rank}
+		\For{$i=1:log_2(\frac{n}{m})$}
+		\State $nb = n/2^i$
+		\State x = 0, y = nb
+		\For{$j=1:2^{i-1}$}
+		\State $\mathbf{U,D,V} = lowrankSVD(A[xbegin+1:xbegin+nb,ybegin+1:ybegin+nb], rank)$
+		\State $\mathbf{A}[x + 1:x + nb, y + 1:y + rank] = \mathbf{UD}$
+		\State $\mathbf{A}[x + 1:x + nb, y + rank+1:y + nb] = \mathbf{O}$
+		\State $\mathbf{A}[y + 1:y + nb, x + 1:x + rank] = \mathbf{VD}$
+		\State $\mathbf{A}[y + 1:y + nb, x + rank+1:x + nb] = \mathbf{O}$
+		\State $x += 2nb, y += 2nb$
+		\EndFor
+		\EndFor
+		\EndProcedure
+		
+	\end{algorithmic}\label{alg:hchol}
+\end{algorithm}
+
+
+\subsection{The Hierarchical-Block Conditioning Method}
 
 Let $\phi_m(\mathbf{x}; \boldsymbol{\Sigma})$ be a pdf of the $m$-dimensional normal distribution $N(\mathbf{0}, \boldsymbol{\Sigma})$ and $(\mathbf{B}, \mathbf{U}\mathbf{V}^T)$ be the hierarchical Cholesky decompostion of the covariance matrix $\Sigma$. Then, we can express \eqref{eqn:normalprob} as 
 \begin{equation}\label{eqn:hmvn}
