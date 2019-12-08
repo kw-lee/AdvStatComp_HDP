@@ -1,4 +1,6 @@
-\section{Results}
+\section{Numerical Examples}
+
+In this section, we show you the results of implementing and experimenting with the methods described above. The implementation was done in julia=1.2.0. Code is made available in the github repository\footnote{\url{https://github.com/kw-lee/AdvStatComp_HDP}}.
 
 \subsection{Cholesky Factorization}
 The \textit{chol} function from \textbf{LinearAlgebra} package, the \textit{dpotrf} from \textbf{LAPACK} package, and hierarchical cholesky decomposition which suggested by \citet{hackbusch2015hierarchical} are implemented. Exponential covariance matrix, $\Sigma_{ij}=exp(-\lVert \mathbf{s}_i-\mathbf{s}_j \rVert/\beta)$ is set with $\beta=0.3$. $n$ points, $\mathbf{s}_1,\cdots,\mathbf{s}_n$ is evenly distributed over unique square with Morton's order which defined recursively as described in figure \ref{fig:morton}.
@@ -14,14 +16,15 @@ With various $n$, three Cholesky methods are applied and results are below table
 
 \begin{table}[h]
 	\centering
-	\resizebox{.5\textwidth}{!}{%
+	% \resizebox{.6\textwidth}{!}{%
+	{
 		\begin{tabular}{@{}ccccc@{}}
 			\toprule
 			n & 256 & 1024 & 4096 & 16384 \\ \midrule
 			chol & 0.001s & 0.0097s & 0.414s & 156.3s \\
 			dpotrf & 0.0007s & 0.0132s & 0.431s & 154.1s \\
 			hierarchical cholesky & 0.153s & 0.076s & 0.916s & 37.3s \\
-			Error of hierarchical cholesky & 1.06e-7 & 9.97e-7 & 1.11e-3 & 1.87e-3
+			Error of hierarchical cholesky & 1.06e-7 & 9.97e-7 & 1.11e-3 & 1.87e-3 \\  \bottomrule
 		\end{tabular}%
 	}
 	\caption{}
@@ -36,14 +39,15 @@ To implement \texttt{*MVN} functions, we need to calculate $n$-dimensional norma
 $$
 \Phi_n(a, b; 0, \Sigma) = \int_a^b \frac{1}{\sqrt{(2\pi)^n |\Sigma|}} \exp\left( -\frac{1}{2} \mathbf{x}^T \Sigma^{-1} \mathbf{x} \right) d\mathbf{x},
 $$ 
-numerically. We implement \texttt{mvn}, the function that calculate multivariate normal probabilities using Richtmyer Quasi-Monte Carlo(QMC) method proposed by \citet{genz2009computation}. It is well-known that QMC methods is more effective than classical Monte Carlo(MC) method. Varying sample size $N$ and dimension $d$, two Monte Carlo methods are compared and results are below table \ref{tab:qmc_vs_mc}. We generate $N$ samples from $N(0, I_d)$ and set $\mathbf{a}_i = -\infty$ and $\mathbf{b}_i = 0$, i.e. true probabilities are $1/2^d$, and repeat 20 times. Relative errors and computation times of each method are formulated.
+numerically. We implement \texttt{mvn}, the function that calculate multivariate normal probabilities using Richtmyer Quasi-Monte Carlo(QMC) method proposed by \citet{genz2009computation}. It is well-known that QMC methods is more effective than classical Monte Carlo(MC) method. Varying sample size $N$ and dimension $d$, two Monte Carlo methods are compared and results are below table \ref{tab:qmc_vs_mc}. We generate $N$ samples from $N(0, I_d)$ and set $\mathbf{a}_i = -\infty$ and $\mathbf{b}_i = 0$, i.e. true probabilities are $1/2^d$s, and repeat 20 times. Relative errors and computation times of each method are formulated.
 
-\begin{table}[!h]
+\begin{table}[h]
 	\centering
-	\resizebox{.6\textwidth}{!}{%
+	% \resizebox{.6\textwidth}{!}{%
+	{
 		\begin{tabular}{@{}cccccc@{}}
 			\toprule
-			(n, d) 				  & 4 		& 8 	  & 12 		& 16 	  & 20	 \\ \midrule
+			$(n, d)$ 				  & 4 		& 8 	  & 12 		& 16 	  & 20	 \\ \midrule
 			\multicolumn{6}{l}{Classical Monte Carlo} \\ \midrule
 			\multirow{2}{*}{500}  & 12.2\%  & 56.8\%  & 161.9\% & 100.0\% & 100.0\% \\
 								  & 0.294ms & 0.016ms & 0.018ms & 0.019ms & 0.019ms \\
@@ -87,11 +91,12 @@ We simulates 250 MVN problems with various values of $m$ and $d$. $\mathbf{\Sigm
 
 \begin{table}[h]
 	\centering
-	\resizebox{.5\textwidth}{!}{%
+	% \resizebox{.6\textwidth}{!}{%
+	{
 		\begin{tabular}{@{}cccccc@{}}
 			\toprule
-			(m, d) & 1 & 2 & 4 & 8 & 16 \\ \midrule
-			\multicolumn{6}{l}{Without univariate reordering} \\
+			$(m, d)$ & 1 & 2 & 4 & 8 & 16 \\ \midrule
+			\multicolumn{6}{l}{Without univariate reordering} \\ \midrule
 			\multirow{2}{*}{16} & 3.7\% & 3.5\% & 3.6\% & 3.8\% & 2.9\% \\
 			& 0.029ms & 0.201ms & 0.431ms & 0.676ms & 1.372ms \\
 			\multirow{2}{*}{32} & 2.4\% & 2.9\% & 2.9\% & 3.3\% & 2.7\% \\
@@ -99,8 +104,8 @@ We simulates 250 MVN problems with various values of $m$ and $d$. $\mathbf{\Sigm
 			\multirow{2}{*}{64} & 1.9\% & 2.1\% & 2.1\% & 1.8\% & 1.9\% \\
 			& 0.004ms & 0.762ms & 1.686ms & 2.545ms & 5.004ms \\
 			\multirow{2}{*}{128} & 1.3\% & 1.5\% & 1.3\% & 1.2\% & 1.4\% \\
-			& 0.024ms & 1.505ms & 3.333ms & 5.146ms & 10.548ms \\
-			\multicolumn{6}{l}{With univariate reordering} \\
+			& 0.024ms & 1.505ms & 3.333ms & 5.146ms & 10.548ms \\ \midrule
+			\multicolumn{6}{l}{With univariate reordering} \\ \midrule
 			\multirow{2}{*}{16} & 3.3\% & 3.1\% & 3.3\% & 3.6\% & 2.7\% \\
 			& 0.007ms & 0.203ms & 0.439ms & 0.680ms & 1.363ms \\
 			\multirow{2}{*}{32} & 2.3\% & 2.6\% & 2.6\% & 3.2\% & 2.6\% \\
@@ -108,7 +113,7 @@ We simulates 250 MVN problems with various values of $m$ and $d$. $\mathbf{\Sigm
 			\multirow{2}{*}{64} & 2.0\% & 2.1\% & 2.1\% & 1.9\% & 1.9\% \\
 			& 0.014ms & 0.773ms & 1.695ms & 2.552ms & 5.022ms \\
 			\multirow{2}{*}{128} & 1.2\% & 1.5\% & 1.4\% & 1.2\% & 1.4\% \\
-			& 0.097ms & 1.593ms & 3.462ms & 5.268ms & 10.7861ms
+			& 0.097ms & 1.593ms & 3.462ms & 5.268ms & 10.7861ms \\ \bottomrule
 		\end{tabular}%
 	}
 	\caption{Errors and execution times of the d-dimensional conditioning method}
