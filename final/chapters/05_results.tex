@@ -10,7 +10,7 @@ The \textit{chol} function from \textbf{LinearAlgebra} package, the \textit{dpot
 	\label{fig:morton}
 \end{figure}
 
-With various $n$, three Cholesky method is applied and results are below table \ref{tab:table1}. In low rank approximation at algorithm \ref{alg:hchol}, rank is about $n^{1/4}$.
+With various $n$, three Cholesky methods are applied and results are below table \ref{tab:table1}. In low rank approximation at algorithm \ref{alg:hchol}, rank is about $n^{1/4}$.
 
 \begin{table}[h]
 	\centering
@@ -36,13 +36,45 @@ To implement \texttt{*MVN} functions, we need to calculate $n$-dimensional norma
 $$
 \Phi_n(a, b; 0, \Sigma) = \int_a^b \frac{1}{\sqrt{(2\pi)^n |\Sigma|}} \exp\left( -\frac{1}{2} \mathbf{x}^T \Sigma^{-1} \mathbf{x} \right) d\mathbf{x},
 $$ 
-numerically. We implement \texttt{mvn}, the function that calculate multivariate normal probabilities using Richtmyer Quasi-Monte Carlo(QMC) method proposed by \citet{genz2009computation}.
+numerically. We implement \texttt{mvn}, the function that calculate multivariate normal probabilities using Richtmyer Quasi-Monte Carlo(QMC) method proposed by \citet{genz2009computation}. It is well-known that QMC methods is more effective than classical Monte Carlo(MC) method. Varying sample size $N$ and dimension $d$, two Monte Carlo methods are compared and results are below table \ref{tab:qmc_vs_mc}. We generate $N$ samples from $N(0, I_d)$ and set $\mathbf{a}_i = -\infty$ and $\mathbf{b}_i = 0$, i.e. true probabilities are $1/2^d$, and repeat 20 times. Relative errors and computation times of each method are formulated.
 
-% table (table/qmc_vs_mc.ipynb)
+\begin{table}[!h]
+	\centering
+	\resizebox{.6\textwidth}{!}{%
+		\begin{tabular}{@{}cccccc@{}}
+			\toprule
+			(n, d) 				  & 4 		& 8 	  & 12 		& 16 	  & 20	 \\ \midrule
+			\multicolumn{6}{l}{Classical Monte Carlo} \\ \midrule
+			\multirow{2}{*}{500}  & 12.2\%  & 56.8\%  & 161.9\% & 100.0\% & 100.0\% \\
+								  & 0.294ms & 0.016ms & 0.018ms & 0.019ms & 0.019ms \\
+			\multirow{2}{*}{1000} & 9.5\%   & 50.6\%  & 193.8\% & 100.0\% & 100.0\% \\
+								  & 0.046ms & 0.041ms & 0.028ms & 0.028ms & 0.034ms \\
+			\multirow{2}{*}{1500} & 8.9\%   & 38.7\%  & 150.2\% & 100.0\% & 100.0\% \\
+								  & 0.055ms & 0.046ms & 0.042ms & 0.048ms & 0.045ms \\
+			\multirow{2}{*}{2000} & 5.4\%   & 26.5\%  & 102.4\% & 100.0\% & 100.0\% \\
+								  & 0.070ms & 0.065ms & 0.072ms & 0.058ms & 0.055ms \\
+			\multirow{2}{*}{2500} & 5.1\%   & 32.0\%  & 100.1\% & 100.0\% & 100.0\% \\
+								  & 0.073ms & 0.092ms & 0.081ms & 0.083ms & 0.076ms \\ \midrule
+			\multicolumn{6}{l}{Richtmyer Quasi-Monte Carlo} \\ \midrule
+			\multirow{2}{*}{500}  & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\% \\
+							      & 0.058ms & 0.003ms & 0.006ms & 0.006ms & 0.011ms \\
+			\multirow{2}{*}{1000} & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\% \\
+						          & 0.003ms & 0.009ms & 0.013ms & 0.017ms & 0.020ms \\
+			\multirow{2}{*}{1500} & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\% \\
+						          & 0.006ms & 0.011ms & 0.016ms & 0.019ms & 0.030ms \\
+			\multirow{2}{*}{2000} & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\% \\
+						          & 0.011ms & 0.012ms & 0.013ms & 0.025ms & 0.036ms \\
+			\multirow{2}{*}{2500} & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\%   & 0.0\% \\
+						          & 0.009ms & 0.022ms & 0.033ms & 0.038ms & 0.056ms \\ \bottomrule
+		\end{tabular}%
+	}
+	\caption{Richtmyer Quasi-Monte Carlo and classical Monte Carlo}
+	\label{tab:qmc_vs_mc}
+\end{table}
 
-It is well-known that QMC methods is more effective than classical Monte Carlo(MC) method. All the multivariate normal distribution probabilities required in the next algorithms are calculated using the \texttt{mvn} function.
+Note QMC is superior to MC in every criterion. All the multivariate normal distribution probabilities required in the next algorithms are calculated using the \texttt{mvn} function.
 
-\subsection{d-dimensional conditioning algorithm without/with reordering}
+\subsection{d-dimensional Conditioning Algorithm without/with Reordering}
 
 Haar distribution is defined with a uniform distribution in the unitary $N\times N$ matrices group, $U(N)$.
 \citet{stewart1980efficient} provides how to sample from Haar distribution with theorem \ref{thm:haar}
@@ -85,7 +117,7 @@ We simulates 250 MVN problems with various values of $m$ and $d$. $\mathbf{\Sigm
 
 Estimation error tended to decrease as $d$ increases with each $m$ since lager $d$ implers less discarded correlation information. Spent time grows to a linear fashion with m while it grows exponentially with $d$.
 
-\subsection{HMVN}
+\subsection{Hierarchical-Block Approximations}
 % HCMVN - 경원 (table 3)
 
 In this section, we implement three methods in the section \ref{sec:hmvn} and compare theirs performance
