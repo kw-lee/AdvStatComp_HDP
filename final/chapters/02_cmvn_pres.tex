@@ -4,7 +4,7 @@
 
 \begin{frame}{Quasi Monte Carlo Method}
 \begin{itemize}
-	\item MonteCarlo Error bound : $O(N^{-1/2})$ for monte carlo(MC) method
+	\item Monte Carlo Error bound : $O(N^{-1/2})$ for monte carlo(MC) method
 	\item \citet{genz2009computation} claimed independent sample points is the reason of slow convergence.
 	\item Via employing low discrepancy sets for sequence, QMC is asymptotically efficient than MC.
 	\item With $\boldsymbol{\Delta}\sim U[0,1]^n$,
@@ -83,72 +83,82 @@ d\mathbf{z}(y_i=\Phi^{-1}(z_i))\nonumber\nonumber\\
 \end{frame}
 
 \begin{frame}{Conditioning Approximation}
-\footnotesize
-\citet{mendell1974multifactorial}, \citet{kamakura1989estimation}, and \citet{trinh2015bivariate} exploit Cholesky factors from LDL decomposition rather than dealing with original covariance matrix.
-Biviarate example is follow.
-$$\boldsymbol{\Sigma} = \begin{pmatrix}
-\boldsymbol{\Sigma}_{1,1} & \mathbf{R}^T\\
-\mathbf{R} & \hat{\boldsymbol{\Sigma}}
-\end{pmatrix}\text{, with } \mathbf{L}=\begin{pmatrix}
-\mathbf{I}_{2} & \mathbf{O}\\1:
-\mathbf{M} & \mathbf{L}
-\end{pmatrix}\text{ and } \mathbf{D}=\begin{pmatrix}
-\mathbf{D}_{1} & \mathbf{O}\\
-\mathbf{O} & \mathbf{\hat{D}}
-\end{pmatrix}$$
-,where $\boldsymbol{\Sigma}_{1,1}, \mathbf{D}_{1}$ is a $2\times2$ matrix. From $\mathbf{D}_1=\boldsymbol{\Sigma_{1,1}}$, $\mathbf{M}=\mathbf{R}\mathbf{D}_1^{-1}$, $\mathbf{\hat{D}}=\hat{\boldsymbol{\Sigma}}-\mathbf{M}\mathbf{D}_1\mathbf{M}^T$
-\begin{align}\label{eqn:phi_cond-biv}
-\boldsymbol{\Phi}_n(\mathbf{a},\mathbf{b};\mathbf{0},\boldsymbol{\Sigma})
-&= \frac{1}{\sqrt{\lvert\mathbf{D}\rvert(2\pi)^n}}\int_{\alpha_1}^{\beta_1}\int_{\alpha_2}^{\beta_2}e^{-\frac{1}{2}\mathbf{x_2}^T\mathbf{D}_1^{-1}\mathbf{x}_2}\nonumber\\
-&\cdots \int_{\alpha_{2k-1}}^{\beta_{2k-1}}\int_{\alpha_{2k}}^{\beta_{2k}}e^{-\frac{1}{2}\mathbf{x_{2k}}^T\mathbf{D}_1^{-1}\mathbf{x}_{2k}}
-\end{align}
+% \footnotesize
+\begin{itemize}
+	\item \citet{mendell1974multifactorial}, \citet{kamakura1989estimation}, and \citet{trinh2015bivariate} exploit Cholesky factors from LDL decomposition rather than dealing with original covariance matrix.
+	\item Biviarate example is follow:
+		$$\boldsymbol{\Sigma} = \begin{pmatrix}
+		\boldsymbol{\Sigma}_{1,1} & \mathbf{R}^T\\
+		\mathbf{R} & \hat{\boldsymbol{\Sigma}}
+		\end{pmatrix}\text{, with } \mathbf{L}=\begin{pmatrix}
+		\mathbf{I}_{2} & \mathbf{O}\\1:
+		\mathbf{M} & \mathbf{L}
+		\end{pmatrix}\text{ and } \mathbf{D}=\begin{pmatrix}
+		\mathbf{D}_{1} & \mathbf{O}\\
+		\mathbf{O} & \mathbf{\hat{D}},
+		\end{pmatrix}$$
+		where $\boldsymbol{\Sigma}_{1,1}, \mathbf{D}_{1}$ is a $2\times2$ matrix. 
+		\item From $\mathbf{D}_1=\boldsymbol{\Sigma_{1,1}}$, $\mathbf{M}=\mathbf{R}\mathbf{D}_1^{-1}$, $\mathbf{\hat{D}}=\hat{\boldsymbol{\Sigma}}-\mathbf{M}\mathbf{D}_1\mathbf{M}^T$
+		\begin{align}\label{eqn:phi_cond-biv}
+		\boldsymbol{\Phi}_n(\mathbf{a},\mathbf{b};\mathbf{0},\boldsymbol{\Sigma})
+		&= \frac{1}{\sqrt{\lvert\mathbf{D}\rvert(2\pi)^n}}\int_{\alpha_1}^{\beta_1}\int_{\alpha_2}^{\beta_2}e^{-\frac{1}{2}\mathbf{x_2}^T\mathbf{D}_1^{-1}\mathbf{x}_2}\nonumber\\
+		&\cdots \int_{\alpha_{2k-1}}^{\beta_{2k-1}}\int_{\alpha_{2k}}^{\beta_{2k}}e^{-\frac{1}{2}\mathbf{x_{2k}}^T\mathbf{D}_1^{-1}\mathbf{x}_{2k}}
+		\end{align}
+	\end{itemize}
 \end{frame}
 
 \begin{frame}{Conditioning Approximation}
-\citet{cao2019hierarchical} generalizes bivariate method of \citet{trinh2015bivariate} to $d$-dimensional. Algorithms and details are following.
-\begin{algorithm}[H]
-	\caption{LDL decomposition}
-	\begin{algorithmic}[1]
-		\tiny
-		\Procedure{\texttt{LDL}}{$\boldsymbol{\Sigma}$}
-		\State $\mathbf{L} \leftarrow \mathbf{I}_m, \mathbf{D} \leftarrow \mathbf{O}_m$
-		\For{$i = 1:d:m-d+1$}
-		\State $\mathbf{D}[i:i+d-1,i:i+d-1] \leftarrow \boldsymbol{\Sigma}[i:i+d-1,i:i+d-1]$
-		\State $\mathbf{L}[i+d:m,i:i+d-1] \leftarrow \boldsymbol{\Sigma}[i+d:m,i:i+d-1]\mathbf{D}^{-1}[i:i+d-1,i:i+d-1]$
-		\State $\boldsymbol{\Sigma}[i+d:m,i+d:m]\leftarrow\boldsymbol{\Sigma}[i+d:m,i+d:m]-\mathbf{L}[i+d:m,i:i+d-1] \mathbf{D}^{-1}[i:i+d-1,i:i+d-1] \mathbf{L}[i:i+d-1,i+d:m]$
-		\If{$i+d<m$}
-		\State $\mathbf{D}[i+d:m,i+d:m] \leftarrow \boldsymbol{\Sigma}[i+d:m,i+d:m]$
-		\EndIf
-		\EndFor
-		\State\Return $\mathbf{L}$ and $\mathbf{D}$
-		\EndProcedure
-	\end{algorithmic}\label{alg:LDL-d}
-\end{algorithm}
+
+	\citet{cao2019hierarchical} generalizes bivariate method of \citet{trinh2015bivariate} to $d$-dimensional. The details are Algorithms \ref{alg:LDL-d}
+	
+	\begin{algorithm}[H]
+			\caption{LDL decomposition}
+			\begin{algorithmic}[1]
+				\scriptsize
+				\Procedure{\texttt{LDL}}{$\boldsymbol{\Sigma}$}
+				\State $\mathbf{L} \leftarrow \mathbf{I}_m, \mathbf{D} \leftarrow \mathbf{O}_m$
+				\For{$i = 1:d:m-d+1$}
+				\State $\mathbf{D}[i:i+d-1,i:i+d-1] \leftarrow \boldsymbol{\Sigma}[i:i+d-1,i:i+d-1]$
+				\State $\mathbf{L}[i+d:m,i:i+d-1] \leftarrow \boldsymbol{\Sigma}[i+d:m,i:i+d-1]\mathbf{D}^{-1}[i:i+d-1,i:i+d-1]$
+				\State $\boldsymbol{\Sigma}[i+d:m,i+d:m]\leftarrow\boldsymbol{\Sigma}[i+d:m,i+d:m]-\mathbf{L}[i+d:m,i:i+d-1] \mathbf{D}^{-1}[i:i+d-1,i:i+d-1] \mathbf{L}[i:i+d-1,i+d:m]$
+				\If{$i+d<m$}
+				\State $\mathbf{D}[i+d:m,i+d:m] \leftarrow \boldsymbol{\Sigma}[i+d:m,i+d:m]$
+				\EndIf
+				\EndFor
+				\State\Return $\mathbf{L}$ and $\mathbf{D}$
+				\EndProcedure
+			\end{algorithmic}\label{alg:LDL-d}
+		\end{algorithm}
 \end{frame}
 
 \begin{frame}{Conditioning Approximation}
-\footnotesize
-When $s=\frac{m}{d}$ is integer, results of Algorithm \ref{alg:LDL-d}, $\mathbf{L}, \mathbf{D}$ can be written as
-$$
-\mathbf{L} = \begin{pmatrix}
-\mathbf{I}_d & \mathbf{O}_d & \cdots &\mathbf{O}_d\\
-\mathbf{L}_{2,1} & \ddots & \ddots &\vdots\\
-\vdots & \ddots & \mathbf{I}_d & \mathbf{O}_d\\
-\mathbf{L}_{s,1} & \cdots & \mathbf{L}_{s,s-1} &\mathbf{I}_d\\
-\end{pmatrix},
-\mathbf{D} = \begin{pmatrix}
-\mathbf{D}_1 & \mathbf{O}_d & \cdots &\mathbf{O}_d\\
-\mathbf{O}_{d} & \ddots & \ddots &\vdots\\
-\vdots & \ddots & \mathbf{D}_{s-1} & \mathbf{O}_d\\
-\mathbf{O}_d & \cdots & \mathbf{O}_d &\mathbf{D}_s\\
-\end{pmatrix}
-$$
-with $d$-dimensional identitiy matrix $\mathbf{I}_d$ and $d$-dimensional zero matrix $\mathbf{O}_d$ and $d$-dimensional positive-definite matrix $\mathbf{D}_1,\cdots,\mathbf{D}_s$. 
-As in \eqref{eqn:phi_cond-biv}, tranformation, $Y=LX$ provides $m$-dimensional multivariate normal prabability as the product of s $d$-dimensional multivariate normal probabilities as below.
-\begin{equation}\label{eqn::phi_cond-ddim}
-\boldsymbol{\Phi_m}(\mathbf{a},\mathbf{b};\mathbf{0},\boldsymbol{\Sigma})=\int_{\mathbf{\alpha}_1}^{\mathbf{\beta}_1}\phi_d(\mathbf{y}_1;\mathbf{D}_1)\int_{\mathbf{\alpha}_2}^{\mathbf{\beta}_2}\phi_d(\mathbf{y}_2;\mathbf{D}_2)\cdots\int_{\mathbf{\alpha}_s}^{\mathbf{\beta}_s}\phi_d(\mathbf{y}_s;\mathbf{D}_s)d\mathbf{y}_s\cdots d\mathbf{y}_2d\mathbf{y}_1
-\end{equation}
-,where $\boldsymbol{\alpha}_i=\mathbf{a}_i-\sum_{j=1}^{i-1}\mathbf{L}_{ij}\mathbf{y}_j, \boldsymbol{\beta}_i=\mathbf{b}_i-\sum_{j=1}^{i-1}\mathbf{L}_{ij}\mathbf{y}_j$
+% \footnotesize
+	When $s=\frac{m}{d}$ is integer, results of Algorithm \ref{alg:LDL-d}, $\mathbf{L}, \mathbf{D}$ can be written as
+		$$
+		\mathbf{L} = \begin{pmatrix}
+		\mathbf{I}_d & \mathbf{O}_d & \cdots &\mathbf{O}_d\\
+		\mathbf{L}_{2,1} & \ddots & \ddots &\vdots\\
+		\vdots & \ddots & \mathbf{I}_d & \mathbf{O}_d\\
+		\mathbf{L}_{s,1} & \cdots & \mathbf{L}_{s,s-1} &\mathbf{I}_d\\
+		\end{pmatrix},
+		\mathbf{D} = \begin{pmatrix}
+		\mathbf{D}_1 & \mathbf{O}_d & \cdots &\mathbf{O}_d\\
+		\mathbf{O}_{d} & \ddots & \ddots &\vdots\\
+		\vdots & \ddots & \mathbf{D}_{s-1} & \mathbf{O}_d\\
+		\mathbf{O}_d & \cdots & \mathbf{O}_d &\mathbf{D}_s\\
+		\end{pmatrix}
+		$$
+		with $d$-dimensional identitiy matrix $\mathbf{I}_d$ and $d$-dimensional zero matrix $\mathbf{O}_d$ and $d$-dimensional positive-definite matrix $\mathbf{D}_1,\cdots,\mathbf{D}_s$. 
+\end{frame}
+
+\begin{frame}
+	As in \eqref{eqn:phi_cond-biv}, tranformation, $Y=LX$ provides $m$-dimensional multivariate normal prabability as the product of s $d$-dimensional multivariate normal probabilities as
+		\begin{align}\label{eqn::phi_cond-ddim}
+		\boldsymbol{\Phi_m}(\mathbf{a},\mathbf{b};\mathbf{0},\boldsymbol{\Sigma})
+		&=\int_{\mathbf{\alpha}_1}^{\mathbf{\beta}_1}\phi_d(\mathbf{y}_1;\mathbf{D}_1)\int_{\mathbf{\alpha}_2}^{\mathbf{\beta}_2}\phi_d(\mathbf{y}_2;\mathbf{D}_2) \\
+		&\quad \cdots\int_{\mathbf{\alpha}_s}^{\mathbf{\beta}_s}\phi_d(\mathbf{y}_s;\mathbf{D}_s)d\mathbf{y}_s\cdots d\mathbf{y}_2d\mathbf{y}_1,
+		\end{align}
+		where $\boldsymbol{\alpha}_i=\mathbf{a}_i-\sum_{j=1}^{i-1}\mathbf{L}_{ij}\mathbf{y}_j, \boldsymbol{\beta}_i=\mathbf{b}_i-\sum_{j=1}^{i-1}\mathbf{L}_{ij}\mathbf{y}_j$
 \end{frame}
 
 \begin{frame}{Conditioning Approximation}
@@ -174,27 +184,38 @@ As in \eqref{eqn:phi_cond-biv}, tranformation, $Y=LX$ provides $m$-dimensional m
 \end{frame}
 
 \begin{frame}{Multidimensional Truncated Expectations}
-\footnotesize
-The truncated expectation is expressed as
-$$E(X^{e_j})=\frac{1}{\boldsymbol{\Phi}(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\boldsymbol{\Sigma})}\int_\mathbf{a}^\mathbf{b}x_j\phi_d(\mathbf{x};\boldsymbol{\mu},\boldsymbol{\Sigma})d\mathbf{x}=\frac{1}{\boldsymbol{\Phi}(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\boldsymbol{\Sigma})}F_j^d(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\boldsymbol{\Sigma})$$
+% \footnotesize
 
-\begin{theorem}\citep{kan2017moments}
-	\label{thm:thmkan}
-	$$F_j^d(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\boldsymbol{\Sigma})= \mu_j\boldsymbol{\Phi}_d(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\boldsymbol{\Sigma})+\mathbf{e}_j^T\boldsymbol{\Sigma}\mathbf{c}$$
-	,where $c$ is a vector with lth component defined as
-	$$\begin{aligned}
-	c_l&=\phi_1(a_l;\mu_l,\sigma_l^2)\Phi_{d-1}(\mathbf{a}_{-l},\mathbf{b}_{-l};\boldsymbol{\hat{\mu}}^1, \hat{\boldsymbol{\Sigma}}_l)
-	-\phi_1(b_l;\mu_l,\sigma_l^2)\Phi_{d-1}(\mathbf{a}_{-l},\mathbf{b}_{-l};\boldsymbol{\hat{\mu}}^2, \hat{\boldsymbol{\Sigma}}_l)\\
-	\boldsymbol{\hat{\mu}}^1_l&=\mu_{-l}+\boldsymbol{\Sigma}_{-l,l}\frac{a_l-\mu_l}{\sigma_l^2},
-	\boldsymbol{\hat{\mu}}^2_l=\mu_{-l}+\boldsymbol{\Sigma}_{-l,l}\frac{b_l-\mu_l}{\sigma_l^2},\\
-	\hat{\boldsymbol{\Sigma}}_l&=\boldsymbol{\Sigma}_{-l,-l} -\frac{1}{\sigma_l^2}\boldsymbol{\Sigma}_{-l,l}\boldsymbol{\Sigma}_{l,-l}
-	\end{aligned}$$
-\end{theorem}
-Theorem \ref{thm:thmkan} has same form with bivariate version of \citet{trinh2015bivariate} with $d=2$ and it allows us to calculate $E[Y^\prime]$ in Algorithm \ref{alg:CMVN} with $\boldsymbol{\Phi}$ which can be obtained with quasi monte calro method proposed by \citet{genz1992numerical}
+\begin{itemize}
+	\item The truncated expectation is expressed as
+	\begin{align*}
+		E(X^{e_j})
+		&=\frac{1}{\boldsymbol{\Phi}(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\boldsymbol{\Sigma})}\int_\mathbf{a}^\mathbf{b}x_j\phi_d(\mathbf{x};\boldsymbol{\mu},\boldsymbol{\Sigma})d\mathbf{x}\\
+		&=\frac{1}{\boldsymbol{\Phi}(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\boldsymbol{\Sigma})}F_j^d(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\boldsymbol{\Sigma})
+	\end{align*}
+	\item Theore \ref{thm:thmkan} has same form with bivariate version of \citet{trinh2015bivariate} with $d=2$ 
+	\item It allows us to calculate $E[Y^\prime]$ in Algorithm \ref{alg:CMVN} with $\boldsymbol{\Phi}$ which can be obtained with quasi monte calro method proposed by \citet{genz1992numerical}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Multidimensional Trunceated Expectations}
+	\begin{theorem}{\citet{kan2017moments}}
+		\label{thm:thmkan}
+		$$F_j^d(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\boldsymbol{\Sigma})= \mu_j\boldsymbol{\Phi}_d(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\boldsymbol{\Sigma})+\mathbf{e}_j^T\boldsymbol{\Sigma}\mathbf{c},$$
+		where $c$ is a vector with lth component defined as
+		$$\begin{aligned}
+		c_l&=\phi_1(a_l;\mu_l,\sigma_l^2)\Phi_{d-1}(\mathbf{a}_{-l},\mathbf{b}_{-l};\boldsymbol{\hat{\mu}}^1, \hat{\boldsymbol{\Sigma}}_l) \\
+		&\quad -\phi_1(b_l;\mu_l,\sigma_l^2)\Phi_{d-1}(\mathbf{a}_{-l},\mathbf{b}_{-l};\boldsymbol{\hat{\mu}}^2, \hat{\boldsymbol{\Sigma}}_l)\\
+		\boldsymbol{\hat{\mu}}^1_l&=\mu_{-l}+\boldsymbol{\Sigma}_{-l,l}\frac{a_l-\mu_l}{\sigma_l^2},
+		\boldsymbol{\hat{\mu}}^2_l=\mu_{-l}+\boldsymbol{\Sigma}_{-l,l}\frac{b_l-\mu_l}{\sigma_l^2},\\
+		\hat{\boldsymbol{\Sigma}}_l&=\boldsymbol{\Sigma}_{-l,-l} -\frac{1}{\sigma_l^2}\boldsymbol{\Sigma}_{-l,l}\boldsymbol{\Sigma}_{l,-l}
+		\end{aligned}$$
+	\end{theorem}
 \end{frame}
 
 \begin{frame}{Multidimensional Conditioning Approximation with Univariate Reordering}
-\footnotesize
+% \footnotesize
 Appropriate integration order on conditioning algorithm possibly improves estiation accuracy
 \begin{itemize}
 	\item \citet{schervish1984algorithm} : integral with shortest integration interval widths be the outermost integration variables
