@@ -50,4 +50,16 @@ Here, sort function arranges elements in the vector 'ind' in an increasing order
     \end{algorithmic}\label{alg:hmvn_bro}
 \end{algorithm}
 
-Block reordering aims for improving accuracy rather than shortening computation time. According to the simulation result introduced in the paper, the extra time used for running block reordering is relatively small compared with the total time costs. The table below displays the running time for block reordering procedure and its condition.
+Block reordering aims for improving accuracy rather than shortening computation time. According to the simulation result introduced in the paper, the extra time used for running block reordering is relatively small compared with the total time costs. The table below displays the running time for block reordering procedure and its condition($m$ is fixed as $4$).
+
+\begin{center}
+    \begin{tabular}{c|c|c|c|c|c|c|c|c|c}
+\hline\hline
+    n & \multicolumn{3}{c}{16} & \multicolumn{3}{c}{64} & \multicolumn{3}{c}{256} \\
+    \hline
+   \beta & 0.03 & 0.1 & 0.3 & 0.03 & 0.1 & 0.3 & 0.03 & 0.1 & 0.3\\
+   \hline
+   Time & 0.72 & 0.70 & 0.85 & 2.62 & 2.94 & 2.54 & 15.83 & 15.34 & 15.09 \\
+\hline\hline
+\end{tabular}
+\end{center}
