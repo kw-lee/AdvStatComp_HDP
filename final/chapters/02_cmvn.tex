@@ -1,6 +1,7 @@
 \section{Multidimensional Conditioning Approximations}
 
-\subsection{Quasi Monte Carlo Method}
+\subsection{Quasi Monte Carlo Method}\label{subsec:qmc}
+
 Error bound of $O(N^{-1/2})$ for monte carlo(MC) method which is guaranteed by central limit theorem is not enough for high dimensional multivariate random variable. \citet{genz2009computation} claimed independent sample points is the reason of slow convergence. \textit{Quasi-Monte Carlo}(QMC) methods uses deterministic sequences of sample points. Via employing low discrepancy sets for sequence, QMC is asymptotically efficient than MC.
 Since square root of prime numbers is irrational and linear independent over the rational numbers, $K_N$ defined below is low-discrepancy sets.
 $$K_N=\{i\mathbf{q}\text{ mod }1,i=1,\cdots,N\},$$
@@ -216,7 +217,7 @@ It is known that appropriate integration order on conditioning algorithm possibl
 		\State $a^\prime=\frac{\mathbf{a}[i]-\mathbf{C}[i,1:i-1]y[1:i-1]}{\mathbf{C[i,i]}}$
 		\State $b^\prime=\frac{\mathbf{b}[i]-\mathbf{C}[i,1:i-1]y[1:i-1]}{\mathbf{C[i,i]}}$
 		\EndFor
-		\State\Return CMVN($\boldsymbol{\Sigma},\mathbf{a},\mathbf{b},d$) as in Algorithm \ref{alg:CMVN}
+		\State\Return \texttt{CMVN}($\boldsymbol{\Sigma},\mathbf{a},\mathbf{b},d$) as in Algorithm \ref{alg:CMVN}
 		\EndProcedure
 	\end{algorithmic}\label{alg:RCMVN}
 \end{algorithm}

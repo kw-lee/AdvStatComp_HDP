@@ -225,7 +225,7 @@ Appropriate integration order on conditioning algorithm possibly improves estiat
 		\State $a^\prime=\frac{\mathbf{a}[i]-\mathbf{C}[i,1:i-1]y[1:i-1]}{\mathbf{C[i,i]}}$
 		\State $b^\prime=\frac{\mathbf{b}[i]-\mathbf{C}[i,1:i-1]y[1:i-1]}{\mathbf{C[i,i]}}$
 		\EndFor
-		\State\Return CMVN($\boldsymbol{\Sigma},\mathbf{a},\mathbf{b},d$) as in Algorithm \ref{alg:CMVN}
+		\State\Return \texttt{CMVN}($\boldsymbol{\Sigma},\mathbf{a},\mathbf{b},d$) as in Algorithm \ref{alg:CMVN}
 		\EndProcedure
 	\end{algorithmic}\label{alg:RCMVN}
 \end{algorithm}

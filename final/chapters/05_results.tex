@@ -40,7 +40,7 @@ To implement \texttt{*MVN} functions, we need to calculate $n$-dimensional norma
 $$
 \Phi_n(a, b; 0, \boldsymbol{\Sigma}) = \int_a^b \frac{1}{\sqrt{(2\pi)^n |\boldsymbol{\Sigma}|}} \exp\left( -\frac{1}{2} \mathbf{x}^T \boldsymbol{\Sigma}^{-1} \mathbf{x} \right) d\mathbf{x},
 $$ 
-numerically. We implement \texttt{mvn}, the function that calculate multivariate normal probabilities using Richtmyer Quasi-Monte Carlo(QMC) method proposed by \citet{genz2009computation}. It is well-known that QMC methods is more effective than classical Monte Carlo(MC) method. Varying sample size $N$ and dimension $d$, two Monte Carlo methods are compared and results are below table \ref{tab:qmc_vs_mc}. We generate $N$ samples from $N(0, I_d)$ and set $\mathbf{a}_i = -\infty$ and $\mathbf{b}_i = 0$, i.e. true probabilities are $1/2^d$s, and repeat 20 times. Relative errors and computation times of each method are formulated.
+numerically. We implement \texttt{mvn}, the function that calculate multivariate normal probabilities using Richtmyer QMC method introduced in subsection \ref{subsec:qmc}. Varying sample size $N$ and dimension $d$, two Monte Carlo methods are compared and results are below table \ref{tab:qmc_vs_mc}. We generate $N$ samples from $N(0, I_d)$ and set $\mathbf{a}_i = -\infty$ and $\mathbf{b}_i = 0$, i.e. true probabilities are $1/2^d$s, and repeat 20 times. Relative errors and computation times of each method are formulated.
 
 \begin{table}[!h]
 	\centering
@@ -227,18 +227,18 @@ Next, we give simulation with a 2D exponential covariance matrix using morton's 
 
 \begin{figure}
 	\centering
-	\includegraphics[width=\linewidth]{figs/table5_time.pdf}
+	\includegraphics[width=0.7\linewidth]{figs/table5_time.pdf}
 	\caption{Execution time (seconds) under the constant covariance structure and 2D exponential covariance structure; solid line: $\beta=0.3$, dashed line: $\beta=0.1$, dotted line: $\beta=0.03$}\label{fig:table5_time}
 \end{figure}
 
-In Table \ref{tab:table5}, $\texttt{HCMVN}_d$ denotes \texttt{HCMVN} function with $d$ and  
+In Table \ref{tab:table5}, $\texttt{HCMVN}_d$ denotes \texttt{HCMVN} function with conditioning parameter $d$ and  
 $$compress = \frac{\text{Total memory size of the } \mathcal{H} \text{ matrix}}{\text{Memory size of the covariance matrix } \boldsymbol{\Sigma}}.$$ 
 
 In this experiment, \citet{cao2019hierarchical} mentioned 
 \begin{quote}
-	It is worth mentioning that the correlation strength is essentially increased when $n$ increases while $\beta$ remains unchanged because the samples are from the unit hypercube. Also the increase of d will reduce the estimation error but is still unable to reach a satisfactory level. The method, when used without a reordering strategy, does not produce sufﬁciently accurate results. This motivated the development of the reordering strategy described in the next section
+	It is worth mentioning that the correlation strength is essentially increased when $n$ increases while $\beta$ remains unchanged because the samples are from the unit hypercube. Also the increase of $d$ will reduce the estimation error but is still unable to reach a satisfactory level. The method, when used without a reordering strategy, does not produce sufﬁciently accurate results. This motivated the development of the reordering strategy described in the next section
 \end{quote}
-with extremely large size simulation. But, in our experiment, this phenomenon could not be found due to restriction of the computing resource.
+with extremely large size simulation. But, in our experiment, above phenomenon could not be observed due to restriction of the computing resource.
 
 % \subsection{Block Reordering}
 % Block Reordering - 현석 (table 5, 6)
