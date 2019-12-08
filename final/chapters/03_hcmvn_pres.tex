@@ -20,7 +20,7 @@ We have applied low rank approximation with svd to (c) each block of its decompo
 
 \begin{frame}{Hierarchical Cholesky Decomposition}
 Hierachical cholesky decomposition of $n\times n$ matrix into $m\times m$ blocks is implemented like below.
-\begin{algorithm}[ht]
+\begin{algorithm}[H]
 	\caption{Hierachical cholesky decomposition}
 	\begin{algorithmic}[1]
 		\tiny
@@ -64,7 +64,7 @@ These methods are more effective and easily parallelizable than the classical me
 \end{frame}
 
 \begin{frame}{The Hierarchical-Block Conditioning Method}
-\begin{algorithm}[ht]
+\begin{algorithm}[H]
 	\caption{Hierarchical-block conditioning algorithm}
 	\begin{algorithmic}[1]
 		\tiny
@@ -97,7 +97,7 @@ These methods are more effective and easily parallelizable than the classical me
 $M(\cdot)$ denotes the complexity of the QMC simulation in the given dimension. \\
 Table \ref{tbl:cc_hmvn} shows that the time efﬁciency of the $d$-dimensional conditioning algorithm mainly comes from lowering the dimension in which the QMC simulation is performed. 
 \renewcommand{\arraystretch}{1.5}
-\begin{table}[ht]
+\begin{table}[H]
 	\begin{center}
 		\begin{tabular}{l l l l}
 			& MVN prob                     & Trunc exp          & Upd limits            \\
