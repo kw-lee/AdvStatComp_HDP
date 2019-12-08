@@ -3,18 +3,18 @@
 \subsection{Quasi Monte Carlo Method}
 Error bound of $O(N^{-1/2})$ for monte carlo(MC) method which is guaranteed by central limit theorem is not enough for high dimensional multivariate random variable. \citet{genz2009computation} claimed independent sample points is the reason of slow convergence. \textit{Quasi-Monte Carlo}(QMC) methods uses deterministic sequences of sample points. Via employing low discrepancy sets for sequence, QMC is asymptotically efficient than MC.
 Since square root of prime numbers is irrational and linear independent over the rational numbers, $K_N$ defined below is low-discrepancy sets.
-$$K_N=\{i\mathbf{q}\text{ mode }1,i=1,\cdots,N\}$$,
+$$K_N=\{i\mathbf{q}\text{ mod }1,i=1,\cdots,N\},$$
 where $\mathbf{q}=\sqrt{\mathbf{p}}$ and $\mathbf{p}$ is set of prime numbers. Selecting $K_N$ shifted with $\boldsymbol{\Delta}\sim U[0,1]^n$ as sample points sequence, we have been implemented QMC.
 $$L_N=\{\mathbf{z}+\boldsymbol{\Delta}\text{ mod }1:\mathbf{z}\in K_N\}$$
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering
 	\includegraphics[width=.5\linewidth]{figs/QMC.jpg}
 	\caption{Comparison of MC and QMC sample points\citep{genz2009computation}}
 	\label{fig:QMC}
 \end{figure}
 
-Cholesky decomposition and few tranformation gives (\ref{eqn:qmc}), and algorithm \label{ref:QMC} implemented (\ref{eqn:qmc}) at $L_N$ $ns$ times.
+Cholesky decomposition and few tranformation gives (\ref{eqn:qmc}), and algorithm \label{ref:QMC} implemented (\ref{eqn:qmc}) at $L_N \times ns$ times.
 
 \begin{align}
 \boldsymbol{\Phi}_n(\mathbf{a}\leq\mathbf{x}\leq\mathbf{b};\boldsymbol{\Sigma})
@@ -36,7 +36,7 @@ d\mathbf{z}(y_i=\Phi^{-1}(z_i))\nonumber\nonumber\\
 \label{eqn:qmc}
 \end{align}
 
-\begin{algorithm}[H]
+\begin{algorithm}[ht]
 	\caption{Multivariate Normal Probability with Quasi Monte Carlo Method}
 	\begin{algorithmic}[1]
 		\Procedure{\texttt{MVN}}{$\boldsymbol{\mu}, \boldsymbol{\Sigma}, \mathbf{a}, \mathbf{b}, ns, N$}
@@ -72,7 +72,8 @@ d\mathbf{z}(y_i=\Phi^{-1}(z_i))\nonumber\nonumber\\
 
 \subsection{Conditioning Approximation}
 
-We can exploit Cholesky factors from LDL decomposition rather than dealing with original covariance matrix. \citet{mendell1974multifactorial} and \citet{kamakura1989estimation} developed conditioning method to calculated cdf of multivariate truncated normal distribution. \citet{trinh2015bivariate} employ bivariate blocking method for efficient calculation while accuracy is preserved.\\
+We can exploit Cholesky factors from LDL decomposition rather than dealing with original covariance matrix. \citet{mendell1974multifactorial} and \citet{kamakura1989estimation} developed conditioning method to calculated cdf of multivariate truncated normal distribution. \citet{trinh2015bivariate} employ bivariate blocking method for efficient calculation while accuracy is preserved
+
 $$\boldsymbol{\Sigma} = \begin{pmatrix}
 \boldsymbol{\Sigma}_{1,1} & \mathbf{R}^T\\
 \mathbf{R} & \hat{\boldsymbol{\Sigma}}
@@ -82,8 +83,8 @@ $$\boldsymbol{\Sigma} = \begin{pmatrix}
 \end{pmatrix}\text{ and } \mathbf{D}=\begin{pmatrix}
 \mathbf{D}_{1} & \mathbf{O}\\
 \mathbf{O} & \mathbf{\hat{D}}
-\end{pmatrix}$$
-,where $\boldsymbol{\Sigma}_{1,1}, \mathbf{D}_{1}$ is a $2\times2$ matrix. From $\mathbf{D}_1=\boldsymbol{\Sigma_{1,1}}$, $\mathbf{M}=\mathbf{R}\mathbf{D}_1^{-1}$, $\mathbf{\hat{D}}=\hat{\boldsymbol{\Sigma}}-\mathbf{M}\mathbf{D}_1\mathbf{M}^T$, we can obtain bivariate LDL decomposition of $\boldsymbol{\Sigma}$ inductively.\\
+\end{pmatrix},$$
+where $\boldsymbol{\Sigma}_{1,1}, \mathbf{D}_{1}$ is a $2\times2$ matrix. From $\mathbf{D}_1=\boldsymbol{\Sigma_{1,1}}$, $\mathbf{M}=\mathbf{R}\mathbf{D}_1^{-1}$, $\mathbf{\hat{D}}=\hat{\boldsymbol{\Sigma}}-\mathbf{M}\mathbf{D}_1\mathbf{M}^T$, we can obtain bivariate LDL decomposition of $\boldsymbol{\Sigma}$ inductively.\\
 With transformation $\mathbf{y}=L\mathbf{x}$, $\mathbf{a}\leq\mathbf{x}\leq\mathbf{b}$ is tranformed to $a_j-\sum_{m=1}^{j-1}l_{jm}x_m=\alpha_j\leq x_j\leq b_j-\sum_{m=1}^{j-1}l_{jm}x_m=\beta_j$ for $j=1,\cdots,n$. Then, with $k=\frac{n}{2}$ and $\mathbf{x}_{2k}=(x_{2k-1},x_{2k})^T$
 \begin{align}\label{eqn:phi_cond-biv}
 	\boldsymbol{\Phi}_n(\mathbf{a},\mathbf{b};\mathbf{0},\boldsymbol{\Sigma})
@@ -91,7 +92,7 @@ With transformation $\mathbf{y}=L\mathbf{x}$, $\mathbf{a}\leq\mathbf{x}\leq\math
 	&\cdots \int_{\alpha_{2k-1}}^{\beta_{2k-1}}\int_{\alpha_{2k}}^{\beta_{2k}}e^{-\frac{1}{2}\mathbf{x_{2k}}^T\mathbf{D}_1^{-1}\mathbf{x}_{2k}}
 \end{align}
 \citet{cao2019hierarchical} generalizes bivariate method of \citet{trinh2015bivariate} to $d$-dimensional. Algorithms and details are following.
-\begin{algorithm}[H]
+\begin{algorithm}[ht]
 	\caption{LDL decomposition}
 	\begin{algorithmic}[1]
 		\Procedure{\texttt{LDL}}{$\boldsymbol{\Sigma}$}
@@ -127,12 +128,12 @@ $$
 with $d$-dimensional identitiy matrix $\mathbf{I}_d$ and $d$-dimensional zero matrix $\mathbf{O}_d$ and $d$-dimensional positive-definite matrix $\mathbf{D}_1,\cdots,\mathbf{D}_s$. Algorithm \ref{alg:LDL-d} is still valid when $m$ is not multiple of $d$ if we allow $\mathbf{L},\mathbf{D}$ to have non-$d$ dimensional matrix block as last row.\\
 As in \eqref{eqn:phi_cond-biv}, tranformation, $Y=LX$ provides $m$-dimensional multivariate normal prabability as the product of s $d$-dimensional multivariate normal probabilities as below.
 \begin{equation}\label{eqn::phi_cond-ddim}
-	\boldsymbol{\Phi_m}(\mathbf{a},\mathbf{b};\mathbf{0},\boldsymbol{\Sigma})=\int_{\mathbf{\alpha}_1}^{\mathbf{\beta}_1}\phi_d(\mathbf{y}_1;\mathbf{D}_1)\int_{\mathbf{\alpha}_2}^{\mathbf{\beta}_2}\phi_d(\mathbf{y}_2;\mathbf{D}_2)\cdots\int_{\mathbf{\alpha}_s}^{\mathbf{\beta}_s}\phi_d(\mathbf{y}_s;\mathbf{D}_s)d\mathbf{y}_s\cdots d\mathbf{y}_2d\mathbf{y}_1
+	\boldsymbol{\Phi_m}(\mathbf{a},\mathbf{b};\mathbf{0},\boldsymbol{\Sigma})=\int_{\mathbf{\alpha}_1}^{\mathbf{\beta}_1}\phi_d(\mathbf{y}_1;\mathbf{D}_1)\int_{\mathbf{\alpha}_2}^{\mathbf{\beta}_2}\phi_d(\mathbf{y}_2;\mathbf{D}_2)\cdots\int_{\mathbf{\alpha}_s}^{\mathbf{\beta}_s}\phi_d(\mathbf{y}_s;\mathbf{D}_s)d\mathbf{y}_s\cdots d\mathbf{y}_2d\mathbf{y}_1,
 \end{equation}
-,where $\boldsymbol{\alpha}_i=\mathbf{a}_i-\sum_{j=1}^{i-1}\mathbf{L}_{ij}\mathbf{y}_j, \boldsymbol{\beta}_i=\mathbf{b}_i-\sum_{j=1}^{i-1}\mathbf{L}_{ij}\mathbf{y}_j$
+where $\boldsymbol{\alpha}_i=\mathbf{a}_i-\sum_{j=1}^{i-1}\mathbf{L}_{ij}\mathbf{y}_j, \boldsymbol{\beta}_i=\mathbf{b}_i-\sum_{j=1}^{i-1}\mathbf{L}_{ij}\mathbf{y}_j$
 Equation \eqref{eqn::phi_cond-ddim} is implemented as below.
 
-\begin{algorithm}[H]
+\begin{algorithm}[ht]
 	\caption{d-dimensional conditioning algorithm}
 	\begin{algorithmic}[1]
 		\Procedure{\texttt{CMVN}}{$\boldsymbol{\Sigma},\mathbf{a},\mathbf{b},d$}
@@ -196,7 +197,7 @@ Theorem \ref{thm:thmkan} has same form with bivariate version of \citet{trinh201
 \subsection{Multidimensional Conditioning Approximation with Univariate Reordering}
 It is known that appropriate integration order on conditioning algorithm possibly improves estiation accuracy. \citet{schervish1984algorithm} originally proposed integral with shortest integration interval widths be the outermost integration variables to reduce overall variation of integrand and \citet{gibson1994monte} suggested variables which have smallest expected values be the outermost integration variables. Since innermost integrals which have smaller variation have the most influence with this order, overall variance reduces.
 \citet{trinh2015bivariate} also employs this ordering, and \citet{cao2019hierarchical} generalized it to $d$-dimensional problem.
-\begin{algorithm}[H]
+\begin{algorithm}[ht]
 	\caption{d-dimensional conditioning algorithm with univariate reordering}
 	\begin{algorithmic}[1]
 		\Procedure{\texttt{RCMVN}}{$\boldsymbol{\Sigma},\mathbf{a},\mathbf{b},d$}

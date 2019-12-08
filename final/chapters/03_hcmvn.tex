@@ -19,7 +19,7 @@ It leads to four tasks:
 \end{itemize}
 (a) and (d) is solved with hierachical cholesky decomposition it self, and (b) is easy since it has triangular form. (c) is implemented with low-rank approximation of SVD, i.e. $A=UDV^T=\sum_{i=1}^n d_i u_iv_i^T\approx\sum_{i=1}^k d_i u_iv_i^T$.
 Hierachical cholesky decomposition of $n\times n$ matrix into $m\times m$ blocks is implemented like below.
-\begin{algorithm}[H]
+\begin{algorithm}[ht]
 	\caption{Hierachical cholesky decomposition}
 	\begin{algorithmic}[1]
 		\Procedure{\texttt{hchol}}{$A$, n,m,rank}
@@ -52,7 +52,7 @@ Let $\phi_m(\mathbf{x}; \boldsymbol{\Sigma})$ be a pdf of the $m$-dimensional no
 \end{equation}
 Where $\mathbf{a}',~\mathbf{b}'$, $i=1,\cdots,r$, are the corresponding segments of the updated $\mathbf{a}$ and $\mathbf{b}$. Specifficaly, we can compute $n$-dimensional MVN problem using hierarchical structure as algorithm \ref{alg:hmvn}.
 
-\begin{algorithm}[H]
+\begin{algorithm}[ht]
     \caption{Hierarchical-block conditioning algorithm}
     \begin{algorithmic}[1]
     
@@ -85,21 +85,38 @@ Note the probabilities $\Phi_m(\mathbf{a}_i, \mathbf{b}_i; \mathbf{0}, \mathbf{B
 
 For a clearer comparison of the complexities, we decompose the complexity of Algorithm \ref{alg:hmvn} into three parts and list the complexity for each part in Table \ref{tbl:cc_hmvn}, where $M(\cdot)$ denotes the complexity of the QMC simulation in the given dimension. 
 %Table \ref{tbl:cc_hmvn} shows that the time efﬁciency of the $d$-dimensional conditioning algorithm mainly comes from lowering the dimension in which the QMC simulation is performed. 
-\renewcommand{\arraystretch}{1.5}
-\begin{table}[ht]
-    \begin{center}
-        \begin{tabular}{l l l l}
-                            & MVN prob                     & Trunc exp          & Upd limits            \\
-            \hline
+% \renewcommand{\arraystretch}{1.5}
+% \begin{table}[h]
+%     \begin{center}
+%         \begin{tabular}{l l l l}
+%                             & MVN prob                     & Trunc exp          & Upd limits            \\
+%             \hline
+%             \texttt{HMVN}   & $\frac{n}{m} M(m)$           & $2nM(m) + O(nm^2)$ & $O(mn + kn log(n/m))$ \\
+%             \texttt{HCMVN}  & $\frac{n}{d} M(d) + O(m^2n)$ & $2nM(d) + O(nd^2)$ & $O(mn + kn log(n/m))$ \\
+%             \texttt{HRCMVN} & $\frac{n}{d} M(d) + O(m^2n)$ & $2nM(d) + O(nd^2)$ & $O(mn + kn log(n/m))$ \\
+%             \hline
+%         \end{tabular}
+%         \caption{Complexity decomposition of the \texttt{HMVN}, \texttt{HCMVN}, and \texttt{HRCMVN}}\label{tbl:cc_hmvn}
+%     \end{center}
+% \end{table}
+% \renewcommand{\arraystretch}{1}
+
+
+\begin{table}[h]
+	\centering
+	% \resizebox{.6\textwidth}{!}{%
+	{
+		\begin{tabular}{@{}llll@{}}
+            \toprule
+                & MVN prob                     & Trunc exp          & Upd limits            \\
+            \midrule
             \texttt{HMVN}   & $\frac{n}{m} M(m)$           & $2nM(m) + O(nm^2)$ & $O(mn + kn log(n/m))$ \\
             \texttt{HCMVN}  & $\frac{n}{d} M(d) + O(m^2n)$ & $2nM(d) + O(nd^2)$ & $O(mn + kn log(n/m))$ \\
             \texttt{HRCMVN} & $\frac{n}{d} M(d) + O(m^2n)$ & $2nM(d) + O(nd^2)$ & $O(mn + kn log(n/m))$ \\
-            \hline
-        \end{tabular}
-        \caption{Complexity decomposition of the \texttt{HMVN}, \texttt{HCMVN}, and \texttt{HRCMVN}}\label{tbl:cc_hmvn}
-    \end{center}
+            \bottomrule
+		\end{tabular}%
+	}
+    \caption{Complexity decomposition of the \texttt{HMVN}, \texttt{HCMVN}, and \texttt{HRCMVN}}\label{tbl:cc_hmvn}
 \end{table}
-\renewcommand{\arraystretch}{1}
 
-
-The three parts of the complexity are the calculation of the MVN probability (MVN prob), the calculation of the truncated expectations (Trunc exp), and the update of the integration limits with truncated expectations (Upd limits). The latter two share the same asymptotic order in all three complexity terms. The updating cost is independent of the method. The complexity of the univariate reordering is $O(m^2 n)$, the same as the complexity of computing the MVN probabilities in \texttt{HCMVN}, resulting in an identical major complexity component for \texttt{HCMVN} and \texttt{HRCMVN}. Since \texttt{HCMVN} and \texttt{HRCMVN} perform the QMC  simulation in $d$-dimensions, these two methods are not greatly affected by the choice of $m$.
+The three parts of the complexity are the calculation of the MVN probability (MVN prob), the calculation of the truncated expectations (Trunc exp), and the update of the integration limits with truncated expectations (Upd limits). The latter two share the same asymptotic order in all three complexity terms. The updating cost is independent of the method. The complexity of the univariate reordering is $O(m^2 n)$, the same as the complexity of computing the MVN probabilities in \texttt{HCMVN}, resulting in an identical major complexity component for \texttt{HCMVN} and \texttt{HRCMVN}. Since \texttt{HCMVN} and \texttt{HRCMVN} perform the QMC simulation in $d$-dimensions, these two methods are not greatly affected by the choice of $m$.

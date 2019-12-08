@@ -16,7 +16,7 @@
 \end{frame}
 
 \begin{frame}{Quasi Monte Carlo Method}
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering
 	\includegraphics[width=\linewidth]{figs/QMC.jpg}
 	\caption{Comparison of MC and QMC sample points\citep{genz2009computation}}
@@ -47,7 +47,7 @@ d\mathbf{z}(y_i=\Phi^{-1}(z_i))\nonumber\nonumber\\
 \end{frame}
 
 \begin{frame}{Quasi Monte Carlo Method}
-\begin{algorithm}[H]
+\begin{algorithm}[ht]
 	\caption{Multivariate Normal Probability with Quasi Monte Carlo Method}
 	\begin{algorithmic}[1]
 		\tiny
@@ -106,7 +106,7 @@ $$\boldsymbol{\Sigma} = \begin{pmatrix}
 
 \begin{frame}{Conditioning Approximation}
 \citet{cao2019hierarchical} generalizes bivariate method of \citet{trinh2015bivariate} to $d$-dimensional. Algorithms and details are following.
-\begin{algorithm}[H]
+\begin{algorithm}[ht]
 	\caption{LDL decomposition}
 	\begin{algorithmic}[1]
 		\tiny
@@ -152,7 +152,7 @@ As in \eqref{eqn:phi_cond-biv}, tranformation, $Y=LX$ provides $m$-dimensional m
 \end{frame}
 
 \begin{frame}{Conditioning Approximation}
-\begin{algorithm}[H]
+\begin{algorithm}[ht]
 	\caption{d-dimensional conditioning algorithm}
 	\begin{algorithmic}[1]
 		\footnotesize
@@ -205,7 +205,7 @@ Appropriate integration order on conditioning algorithm possibly improves estiat
 \end{frame}
 
 \begin{frame}{Multidimensional Conditioning Approximation with Univariate Reordering}
-\begin{algorithm}[H]
+\begin{algorithm}[ht]
 	\caption{d-dimensional conditioning algorithm with univariate reordering}
 	\begin{algorithmic}[1]
 		\tiny
