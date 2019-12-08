@@ -1,5 +1,75 @@
 \section{Multidimensional Conditioning Approximations}
 
+\subsection{Quasi Monte Carlo Method}
+Error bound of $O(N^{-1/2})$ for monte carlo(MC) method which is guaranteed by central limit theorem is not enough for high dimensional multivariate random variable. \citet{genz2009computation} claimed independent sample points is the reason of slow convergence. \textit{Quasi-Monte Carlo}(QMC) methods uses deterministic sequences of sample points. Via employing low discrepancy sets for sequence, QMC is asymptotically efficient than MC.
+Since square root of prime numbers is irrational and linear independent over the rational numbers, $K_N$ defined below is low-discrepancy sets.
+$$K_N=\{i\mathbf{q}\text{ mode }1,i=1,\cdots,N\}$$,
+where $\mathbf{q}=\sqrt{\mathbf{p}}$ and $\mathbf{p}$ is set of prime numbers. Selecting $K_N$ shifted with $\boldsymbol{\Delta}\sim U[0,1]^n$ as sample points sequence, we have been implemented QMC.
+$$L_N=\{\mathbf{z}+\boldsymbol{\Delta}\text{ mod }1:\mathbf{z}\in K_N\}$$
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=.5\linewidth]{figs/QMC.jpg}
+	\caption{Comparison of MC and QMC sample points\citep{genz2009computation}}
+	\label{fig:QMC}
+\end{figure}
+
+Cholesky decomposition and few tranformation gives (\ref{eqn:qmc}), and algorithm \label{ref:QMC} implemented (\ref{eqn:qmc}) at $L_N$ $ns$ times.
+
+\begin{align}
+\boldsymbol{\Phi}_n(\mathbf{a}\leq\mathbf{x}\leq\mathbf{b};\boldsymbol{\Sigma})
+&=\boldsymbol{\Phi}_n(a\leq\mathbf{Ly}\leq\mathbf{b};I_n)\nonumber\\
+&=\int_{a_1\leq l_{11}y_1\leq b_1}\phi(y_1)\cdots\int_{a_n\leq\mathbf{l}_n^t\mathbf{y}\leq b_n}\phi(y_n)d\mathbf{y}\nonumber\\
+&=\int_{\tilde{a}_1}^{\tilde{b}_1}\phi(y_1)
+\int_{\tilde{a}_2(y_1)}^{\tilde{b}_2(y_1)}\phi(y_2)\cdots
+\int_{\tilde{a}_n(y_1,\cdots,y_{n-1})}^{\tilde{b}_n(y_1,\cdots,y_{n-1})}\phi(y_n)d\mathbf{y}\nonumber\\
+\text{with } & \tilde{a}_i(y_1,\cdots,y_{i-1})=\frac{a_i-\sum_{j=1}^{i-1}l_{ij}y_j}{l_{ii}}\text{ and }
+(\tilde{b}_i(y_1,\cdots,y_{i-1}))=\frac{b_i-\sum_{j=1}^{i-1}l_{ij}y_j}{l_{ii}}\nonumber\\
+\intertext{}
+&=\int_{\Phi(\tilde{a}_1)}^{\Phi(\tilde{b}_1)}
+\int_{\Phi(\tilde{a}_2(\Phi^{-1}(z_1)))}^{\Phi(\tilde{b}_2(\Phi^{-1}(z_1)))}\cdots
+\int_{\Phi(\tilde{a}_n(\Phi^{-1}(z_1),\cdots,\Phi^{-1}(z_{n-1})))}^{\Phi(\tilde{b}_n(\Phi^{-1}(z_1),\cdots,\Phi^{-1}(z_{n-1})))}
+d\mathbf{z}(y_i=\Phi^{-1}(z_i))\nonumber\nonumber\\
+&=(e_1-d_1)\int_0^1(e_2(w_1)-d_2(w_1))\cdots\nonumber\\
+&\int_0^1(e_n(w_1,\cdots,w_{n-1}) - d_n(w_1,\cdots,w_{n-1})))\int_0^1d\mathbf{w}\nonumber\\
+\text{with } & z_i=d_i+(e_i-d_i)w_i 
+\label{eqn:qmc}
+\end{align}
+
+\begin{algorithm}[H]
+	\caption{Multivariate Normal Probability with Quasi Monte Carlo Method}
+	\begin{algorithmic}[1]
+		\Procedure{\texttt{MVN}}{$\boldsymbol{\mu}, \boldsymbol{\Sigma}, \mathbf{a}, \mathbf{b}, ns, N$}
+		\State $\mathbf{L}=\text{cholesky}(\boldsymbol{\Sigma})$
+		\State $\mathbf{a}=\mathbf{a}-\boldsymbol{\mu}$; $\mathbf{b}=\mathbf{b}-\boldsymbol{\mu}$
+		\State $T=0,N=0,V=0$
+		\State $\mathbf{p}$ = vector of primes less than $\frac{5n\log{n+1}}{4}$;$\mathbf{q}=\sqrt{\mathbf{p}}$
+		\State $\mathbf{P}=\mathbf{1}_{ns}$
+		\State $ans = 0$
+		\For{$i=1,\cdots,ns$}
+		\State $I_i=0$, $\boldsymbol{\Delta}\sim U(0,1)^n$
+		\For{$j=1,\cdots,N$}
+		\State $\mathbf{X}[1:n,j]=(j+1)\mathbf{q}+\boldsymbol{\Delta}$
+		\State $\mathbf{X}[1:n,j]=2\lvert\mathbf{X}[1:n,j]-\text{floor}(\mathbf{X}[1:n,j])\rvert-1$
+		\EndFor
+		\State $\mathbf{sample}=\mathbf{O}_{n,N}$
+		\State $\mathbf{s},\mathbf{c},\mathbf{d},\mathbf{dc}, \mathbf{P}=\mathbf{0}_N$
+		\For{$j=1, \cdots,n$}
+		\If{$j>1$}
+		\State $c=\min(1, c + X[j-1,:]\odot dc)$
+		\State $\mathbf{sample}[i-1,1:N] = \Phi^{-1}(c)$
+		\State $s = \mathbf{sample}[1:i-1,1:N]^TL[1:i-1, i]$
+		\EndIf
+		\State $\mathbf{P} *= \Phi(\frac{b-s}{L[i,i]}) - \Phi(\frac{a-s}{L[i,i]})$
+		\EndFor
+		\State $\text{ans} += \text{mean}(\mathbf{P})$
+		\EndFor
+		\State\Return $\text{ans}/ns$
+		\EndProcedure
+	\end{algorithmic}\label{alg:QMC}
+\end{algorithm}
+
+
 \subsection{Conditioning Approximation}
 
 We can exploit Cholesky factors from LDL decomposition rather than dealing with original covariance matrix. \citet{mendell1974multifactorial} and \citet{kamakura1989estimation} developed conditioning method to calculated cdf of multivariate truncated normal distribution. \citet{trinh2015bivariate} employ bivariate blocking method for efficient calculation while accuracy is preserved.\\
@@ -82,7 +152,7 @@ Equation \eqref{eqn::phi_cond-ddim} is implemented as below.
 \end{algorithm}
 
 \subsection{Multidimensional Truncated Expectations}
-In algorithm \ref{alg:CMVN} needs approximation of $\boldsymbol{\Phi}_d$ and $E[Y^\prime]$. $\boldsymbol{\Phi}_d$ is possibly obtained with quasi monte calro method proposed by \citet{genz2009computation}, and \citet{kan2017moments} provides methods to calculate $E[Y^\prime]$. The truncated expectation is expressed as
+In algorithm \ref{alg:CMVN} needs approximation of $\boldsymbol{\Phi}_d$ and $E[Y^\prime]$. $\boldsymbol{\Phi}_d$ is possibly obtained with quasi monte calro method proposed by \citet{genz1992numerical}, and \citet{kan2017moments} provides methods to calculate $E[Y^\prime]$. The truncated expectation is expressed as
 $$E(X^{e_j})=\frac{1}{\boldsymbol{\Phi}(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\boldsymbol{\Sigma})}\int_\mathbf{a}^\mathbf{b}x_j\phi_d(\mathbf{x};\boldsymbol{\mu},\boldsymbol{\Sigma})d\mathbf{x}=\frac{1}{\boldsymbol{\Phi}(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\boldsymbol{\Sigma})}F_j^d(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\boldsymbol{\Sigma})$$
 
 \begin{theorem}\label{thm:thmkan}\citep{kan2017moments}
@@ -121,7 +191,7 @@ c_l&=\phi_1(a_l;\mu_l,\sigma_l^2)\Phi_{d-1}(\mathbf{a}_{-l},\mathbf{b}_{-l};\bol
 	&-\phi_1(b_l;\mu_l,\sigma_l^2)\Phi_{d-1}(\mathbf{a}_{-l},\mathbf{b}_{-l};\boldsymbol{\hat{\mu}}^2, \hat{\boldsymbol{\Sigma}}_l)
 	\end{aligned}$$
 \end{proof}
-Theorem \ref{thm:thmkan} has same form with bivariate version of \citet{trinh2015bivariate} with $d=2$ and it allows us to calculate $E[Y^\prime]$ in Algorithm \ref{alg:CMVN} with $\boldsymbol{\Phi}$ which can be obtained with quasi monte calro method proposed by \citet{genz2009computation}
+Theorem \ref{thm:thmkan} has same form with bivariate version of \citet{trinh2015bivariate} with $d=2$ and it allows us to calculate $E[Y^\prime]$ in Algorithm \ref{alg:CMVN} with $\boldsymbol{\Phi}$ which can be obtained with quasi monte calro method proposed by \citet{genz1992numerical}
 
 \subsection{Multidimensional Conditioning Approximation with Univariate Reordering}
 It is known that appropriate integration order on conditioning algorithm possibly improves estiation accuracy. \citet{schervish1984algorithm} originally proposed integral with shortest integration interval widths be the outermost integration variables to reduce overall variation of integrand and \citet{gibson1994monte} suggested variables which have smallest expected values be the outermost integration variables. Since innermost integrals which have smaller variation have the most influence with this order, overall variance reduces.

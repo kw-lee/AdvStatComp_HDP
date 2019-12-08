@@ -8,7 +8,7 @@ In this section, we suggest methods to solve the $n$-dimensional MVN problem wit
 
 \citet{hackbusch2015hierarchical} proposed hiarchical matrix and its cholesky decomposition method. We have applied low rank approximation to each block of its decomposition to make implementation efficiently and save storage while accuracy is preserved.
 $A=LU$have the structure
-$$\begin{pmatrix}A_{11}&A_{12}\\A_{21}&A_{22}\end{pmatrix}=\begin{pmatrix}L_{11}&O\\L_{21}&L_{22}\end{pmatrix}\begin{pmatrix}L_{11}^T&L_{12}^2\\O&L_{22}\end{pmatrix}$$
+$$\begin{pmatrix}A_{11}&A_{12}\\A_{21}&A_{22}\end{pmatrix}=\begin{pmatrix}L_{11}&O\\L_{21}&L_{22}\end{pmatrix}\begin{pmatrix}L_{11}^T&L_{12}^T\\O&L_{22}^T\end{pmatrix}$$
 with lower triangular matrix $L_{11},L_{22}$.
 It leads to four tasks:
 \begin{itemize}
@@ -17,7 +17,7 @@ It leads to four tasks:
 	\item[(c)] low rank approximation of $L_{12}=UV^T$
 	\item[(d)] compute $L_{22}$ via Cholesky decomposition of $A_{22}-L_{21}L_{21}^T$
 \end{itemize}
-(a) and (d) is solved with hierachical cholesky decomposition it self, and (b) is easy since it has triangular form. (c) is implemented with low-rank approximation of SVD, i.e. $A=UDV^T=\sum_{i=1}^n d_i u_iv_i^T=\sum_{i=1}^k d_i u_iv_i^T$.
+(a) and (d) is solved with hierachical cholesky decomposition it self, and (b) is easy since it has triangular form. (c) is implemented with low-rank approximation of SVD, i.e. $A=UDV^T=\sum_{i=1}^n d_i u_iv_i^T\approx\sum_{i=1}^k d_i u_iv_i^T$.
 Hierachical cholesky decomposition of $n\times n$ matrix into $m\times m$ blocks is implemented like below.
 \begin{algorithm}[H]
 	\caption{Hierachical cholesky decomposition}
@@ -72,7 +72,7 @@ Where $\mathbf{a}',~\mathbf{b}'$, $i=1,\cdots,r$, are the corresponding segments
             \State $\mathbf{a}_i \leftarrow \mathbf{a}[j+1:j+m]$
             \State $\mathbf{b}_i \leftarrow \mathbf{b}[j+1:j+m]$
             \State $P = P*\Phi_m(\mathbf{a}_i, \mathbf{b}_i; \mathbf{0}, \mathbf{B}_i\mathbf{B}_i^T)$
-            \State $\mathbf{x}[j+1:j+m] \leftarrow \mathbf{B}_{i}^{-1} \expt{\mathbf{X}_i}$
+            \State $\mathbf{x}[j+1:j+m] \leftarrow \mathbf{B}_{i}^{-1} E(\mathbf{X}_i)$
         \EndFor
     \EndProcedure
 

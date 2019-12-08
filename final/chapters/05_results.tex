@@ -6,7 +6,7 @@ In this section, we show you the results of implementing and experimenting with 
 
 The \textit{chol} function from \textbf{LinearAlgebra} package, the \textit{dpotrf} from \textbf{LAPACK} package, and hierarchical cholesky decomposition which suggested by \citet{hackbusch2015hierarchical} are implemented. Exponential covariance matrix, $\boldsymbol{\Sigma}_{ij}=exp(-\lVert \mathbf{s}_i-\mathbf{s}_j \rVert/\beta)$ is set with $\beta=0.3$. $n$ points, $\mathbf{s}_1,\cdots,\mathbf{s}_n$ is evenly distributed over unique square with Morton's order which defined recursively as described in figure \ref{fig:morton}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
 	\includegraphics[width=.5\linewidth]{figs/Morton.jpg}
 	\caption{Morton's order\citep{salem2016comparative}}
@@ -15,7 +15,7 @@ The \textit{chol} function from \textbf{LinearAlgebra} package, the \textit{dpot
 
 With various $n$, three Cholesky methods are applied and results are below table \ref{tab:table1}. In low rank approximation at algorithm \ref{alg:hchol}, rank is about $n^{1/4}$.
 
-\begin{table}[h]
+\begin{table}[ht]
 	\centering
 	% \resizebox{.6\textwidth}{!}{%
 	{
@@ -42,7 +42,7 @@ $$
 $$ 
 numerically. We implement \texttt{mvn}, the function that calculate multivariate normal probabilities using Richtmyer Quasi-Monte Carlo(QMC) method proposed by \citet{genz2009computation}. It is well-known that QMC methods is more effective than classical Monte Carlo(MC) method. Varying sample size $N$ and dimension $d$, two Monte Carlo methods are compared and results are below table \ref{tab:qmc_vs_mc}. We generate $N$ samples from $N(0, I_d)$ and set $\mathbf{a}_i = -\infty$ and $\mathbf{b}_i = 0$, i.e. true probabilities are $1/2^d$s, and repeat 20 times. Relative errors and computation times of each method are formulated.
 
-\begin{table}[h]
+\begin{table}[ht]
 	\centering
 	% \resizebox{.6\textwidth}{!}{%
 	{
@@ -90,7 +90,7 @@ Haar distribution is defined with a uniform distribution in the unitary $N\times
 
 We simulates 250 MVN problems with various values of $m$ and $d$. $\boldsymbol{\Sigma}=\mathbf{Q}\mathbf{J}\mathbf{Q}^T$ is simulated with $\mathbf{Q}\sim{Haar distribution}$ and $J=diag(j_i)$ where $j_1,\cdots,j_m\sim U(0,1)$. Integration limits $a_i=-\infty$ and $b_i\sim(U,m)$ for $i=1\cdots,m$ are chosen. Estimated value is compared with approximated value obtained via quasi monte carlo method with a sample size of $10^4$, which ensures error below $10^{-4}$, and relative error and spent time is formulated below.
 
-\begin{table}[h]
+\begin{table}[ht]
 	\centering
 	% \resizebox{.6\textwidth}{!}{%
 	{
@@ -143,7 +143,7 @@ We use 20 as the sample size instead of 250 as in Table \ref{tab:table2} because
 
 We set the integration limits $a_i=-\infty$ and $b_i\sim(U,n)$ for $i=1\cdots,n$, $\theta=0.7$, $d_{ij} = 1$, and $\beta=10$ as in \citet{cao2019hierarchical}. Estimated value is compared with approximated value obtained via QMC with a sample size of $10^4$. In this simulation, we fix $d=4$ for \texttt{HCMVN} and \texttt{HRCMVN}. Table \ref{tab:table3} and Figure \ref{fig:table3_time} are errors and execution times under the constant covariance structure and 1D exponential covariance structure respectively. 
 
-\begin{table}[h]
+\begin{table}[ht]
 	\centering
 	{
 		\begin{tabular}{@{}llllllllll@{}}
@@ -196,7 +196,7 @@ Note the excution times of M2 and M3 are significantly smaller than of M1 even t
 
 Next, we give simulation with a 2D exponential covariance matrix using morton's order for indexing the sample points on the plane. We fix $m = 8$ for the 2D covariance structure and examine the effectiveness of our algorithm varying $d =1,2,4$. To test the sensitivity with respect to the correlation strength, we perform the estimation under $\beta = 0.3, 0.1$, and 0.03, representing strong, medium, and weak correlation strengths. We set $n$ to 16, 64, 256 and other settings are same as above. Table \ref{tab:table5} presents the results.
 
-\begin{table}[h]
+\begin{table}[ht]
 	\centering
 	{
 		\begin{tabular}{@{}ccccccc@{}}

@@ -3,7 +3,7 @@
 
 Summarizing the previous computations, the cdf value for $n$-dimensioned multivariate normal variable comprises of $m$ multiplications of $d$-dimensional integrals. The idea arose from the construction of hierarchical Cholesky decomposition of covariance matrix, which enables concentration of high correlation values in the block diagonal area. As a consequence, correlation within blocks(or, group of compositions) are high while correlation between blocks(between groups) are low. Recall the RCMVN algorithm(\ref{alg:CMVN}) : as computing each $d$-dimensional integral values, integration variables were arranged in order of increasing order of CMVN probability values, from outer to inner. Trinh and Genz (2015) discovered that this reordering improves overall accuracy. In this sense, the authors adopted block reordering procedure. Briefly speaking, this procedure permutes the block of LDL-decomposed covariance matrix, in order of RCMVN probability values of each blocks. On the top left corner, the block with minimal probability value get its place. The block reordering algorithm introduced in the paper is as following:\\
 
-\begin{algorithm}[h]
+\begin{algorithm}[ht]
     \caption{Blockwise reordering}
 	\begin{algorithmic}[1]
 		\Procedure{\texttt{Blockreorder}}{$G, \rho, a, b, m, ind$}
@@ -24,7 +24,7 @@ Summarizing the previous computations, the cdf value for $n$-dimensioned multiva
 Here, sort function arranges elements in the vector 'ind' in an increasing order based on $\mathbf{P}$. Also, $G$ means the intrinsic geometry of data. In practice, we set the geometry as 2D isotropic exponential covariance model, assuming data observation occured in unit square grd, indices arranged based on Morton order of level 1. The paper implemented the comparison between computing HMVN, HCMVN, HRCMVN values with or without block reordering procedure. Commonly, block reordering procedure places on the way before implementing hierarchical decomposition. For example, one can derive the algorithms of HMVN, including block reordering procedure as following:\\ 
 
 
-\begin{algorithm}[h]
+\begin{algorithm}[ht]
     \caption{Hierarchical-block conditioning algorithm with Block Reordering}
     \begin{algorithmic}
         \Procedure{\texttt{HCMVN\_BRO}}{$a,~b,~\Sigma,~d$}
@@ -44,25 +44,27 @@ Here, sort function arranges elements in the vector 'ind' in an increasing order
                 \State $\mathbf{a}_i \leftarrow \mathbf{a}[j+1:j+m]$
                 \State $\mathbf{b}_i \leftarrow \mathbf{b}[j+1:j+m]$
                 \State $P = P*\Phi_m(\mathbf{a}_i, \mathbf{b}_i; \mathbf{0}, \mathbf{B}_i\mathbf{B}_i^T)$
-                \State $\mathbf{x}[j+1:j+m] \leftarrow \mathbf{B}_{i}^{-1} \expt{\mathbf{X}_i}$
+                \State $\mathbf{x}[j+1:j+m] \leftarrow \mathbf{B}_{i}^{-1} E(\mathbf{X}_i)$
             \EndFor
         \EndProcedure
     \end{algorithmic}\label{alg:hmvn_bro}
 \end{algorithm}
 
-Block reordering aims for improving accuracy rather than shortening computation time. According to the simulation result introduced in the paper, the extra time used for running block reordering is relatively small compared with the total time costs. The table below displays the running time for block reordering procedure and its condition($m$ is fixed as $4$).
+Block reordering aims for improving accuracy rather than shortening computation time. According to the simulation result introduced in the paper, the extra time used for running block reordering is relatively small compared with the total time costs. 
 
-\begin{center}
-    \begin{tabular}{c|c|c|c|c|c|c|c|c|c}
-\hline\hline
-    n & \multicolumn{3}{c}{16} & \multicolumn{3}{c}{64} & \multicolumn{3}{c}{256} \\
-    \hline
-   \beta & 0.03 & 0.1 & 0.3 & 0.03 & 0.1 & 0.3 & 0.03 & 0.1 & 0.3\\
-   \hline
-   Time & 0.72 & 0.70 & 0.85 & 2.62 & 2.94 & 2.54 & 15.83 & 15.34 & 15.09 \\
-\hline\hline
-\end{tabular}
-\end{center}
+% The table below displays the running time for block reordering procedure and its condition($m$ is fixed as $4$).
 
-Iterations per each option was held 20 times uniformly, and running time per iteration was measured. As shown in the table, it does not seems like there are special trend of time in respect of the value of $\beta$. This is rational because the cases of $n = 64$ and $n = 256$ shows decreasing trend of time with respect to the value of $\beta$ while the case of $n = 16$ does not show the exact trend as the prior one.
+% \begin{center}
+%     \begin{tabular}{c|c|c|c|c|c|c|c|c|c}
+% \hline\hline
+%     n & \multicolumn{3}{c}{16} & \multicolumn{3}{c}{64} & \multicolumn{3}{c}{256} \\
+%     \hline
+%    \beta & 0.03 & 0.1 & 0.3 & 0.03 & 0.1 & 0.3 & 0.03 & 0.1 & 0.3\\
+%    \hline
+%    Time & 0.72 & 0.70 & 0.85 & 2.62 & 2.94 & 2.54 & 15.83 & 15.34 & 15.09 \\
+% \hline\hline
+% \end{tabular}
+% \end{center}
+
+% Iterations per each option was held 20 times uniformly, and running time per iteration was measured. As shown in the table, it does not seems like there are special trend of time in respect of the value of $\beta$. This is rational because the cases of $n = 64$ and $n = 256$ shows decreasing trend of time with respect to the value of $\beta$ while the case of $n = 16$ does not show the exact trend as the prior one.
 
