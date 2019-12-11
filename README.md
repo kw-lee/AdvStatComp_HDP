@@ -102,13 +102,7 @@ This project has a five-point plan:
 ## Requirements
 
 * `julia=1.2.0`
-  * LinearAlgebra.jl
-  * Primes.jl
-  * Statistics.jl
-  * Distributions.jl
-  * StatsFuns.jl
-  * SparseArrays.jl
-  * LowRankApprox.jl
+* read Manifest.toml and Project.toml
 
 ## References
 
