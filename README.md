@@ -17,14 +17,19 @@ Report is in ```final``` folder
 .
 |-- final
 |   |-- chapters
-|   `-- figs
+|   |-- figs
+|   |-- presentation.pdf
+|   `-- report.pdf
 |-- notebooks
+|   `-- tables
 |-- proposal
 |-- refs
 `-- src 
     |-- cmvn.jl
     |-- generate.jl
     |-- hchol.jl
+    |-- hchol_genton.jl
+    |-- hchol_sh.jl
     |-- hcmvn.jl
     |-- mvn.jl
     |-- rcmvn.jl
@@ -32,14 +37,19 @@ Report is in ```final``` folder
     `-- truncnorm.jl
 ```
 
-* `final`: final presentation
+* `final`: files to submit
+  * report.pdf(.tex): report file
+  * presentation.pdf(.tex): presentation file
 * `notebooks`: jupyter notebooks 
+  * `table`: files to reproduce table in cao2019
 * `proposal`: project proposal
 * `refs`: references
 * `src`: source codes
   * `cmvn.jl`: Implement d-dimensional conditioning algorithm in julia
   * `generate.jl`: Generate covariance matrix for simulations
   * `hchol.jl`: Implement hierarchical decompositions in julia 
+  * `hchol_genton.jl`: Implement hierarchical decompositions from genton2018 in julia
+  * `hchol_sh.jl`: Implement hierarchical decompositions in julia by Songhyun Kim. 
   * `hcmvn.jl`: Compute high-dimensional normal probability using hierarchical decompositions
   * `mvn.jl`: Compute normal probability and truncated expectation using QMC
   * `rcmvn.jl`: d-dimensional conditioning algorithm with univariate reordering
