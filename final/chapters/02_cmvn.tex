@@ -154,7 +154,7 @@ Equation \eqref{eqn::phi_cond-ddim} is implemented as below.
 \end{algorithm}
 
 \subsection{Multidimensional Truncated Expectations}
-In algorithm \ref{alg:CMVN} needs approximation of $\boldsymbol{\Phi}_d$ and $E[Y^\prime]$. $\boldsymbol{\Phi}_d$ is possibly obtained with quasi monte calro method proposed by \citet{genz1992numerical}, and \citet{kan2017moments} provides methods to calculate $E[Y^\prime]$. The truncated expectation is expressed as
+In algorithm \ref{alg:CMVN}, approximation of $\boldsymbol{\Phi}_d$ and $E[Y^\prime] is required$. $\boldsymbol{\Phi}_d$ is possibly obtained with quasi monte calro method proposed by \citet{genz1992numerical}, and \citet{kan2017moments} provides methods to calculate $E[Y^\prime]$. The truncated expectation can be expressed by
 $$E(X^{e_j})=\frac{1}{\boldsymbol{\Phi}(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\boldsymbol{\Sigma})}\int_\mathbf{a}^\mathbf{b}x_j\phi_d(\mathbf{x};\boldsymbol{\mu},\boldsymbol{\Sigma})d\mathbf{x}=\frac{1}{\boldsymbol{\Phi}(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\boldsymbol{\Sigma})}F_j^d(\mathbf{a},\mathbf{b};\boldsymbol{\mu},\boldsymbol{\Sigma})$$
 
 \begin{theorem}\label{thm:thmkan}\citep{kan2017moments}
@@ -196,7 +196,7 @@ c_l&=\phi_1(a_l;\mu_l,\sigma_l^2)\Phi_{d-1}(\mathbf{a}_{-l},\mathbf{b}_{-l};\bol
 Theorem \ref{thm:thmkan} has same form with bivariate version of \citet{trinh2015bivariate} with $d=2$ and it allows us to calculate $E[Y^\prime]$ in Algorithm \ref{alg:CMVN} with $\boldsymbol{\Phi}$ which can be obtained with quasi monte calro method proposed by \citet{genz1992numerical}
 
 \subsection{Multidimensional Conditioning Approximation with Univariate Reordering}
-It is known that appropriate integration order on conditioning algorithm possibly improves estiation accuracy. \citet{schervish1984algorithm} originally proposed integral with shortest integration interval widths be the outermost integration variables to reduce overall variation of integrand and \citet{gibson1994monte} suggested variables which have smallest expected values be the outermost integration variables. Since innermost integrals which have smaller variation have the most influence with this order, overall variance reduces.
+It is known that appropriate integration order on conditioning algorithm possibly improves estimation accuracy, by reducing overall variation. \citet{schervish1984algorithm} originally proposed to arrange variables having relatively short integration interval width than other variables should be integrated later. Also, \citet{gibson1994monte} suggested variables which have smallest expected values should be placed in outermost postion of the whole integration. Since, inner integrals which have smaller variation have the most influence with this order, overall variance decreases.
 \citet{trinh2015bivariate} also employs this ordering, and \citet{cao2019hierarchical} generalized it to $d$-dimensional problem.
 \begin{algorithm}[ht]
 	\caption{d-dimensional conditioning algorithm with univariate reordering}
