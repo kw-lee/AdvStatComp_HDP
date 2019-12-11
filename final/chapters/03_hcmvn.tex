@@ -6,7 +6,7 @@ In this section, we suggest methods to solve the $n$-dimensional MVN problem wit
 
 \subsection{Hierarchical Cholesky Decomposition}
 
-\citet{hackbusch2015hierarchical} proposed adopting hiarchical matrix and its Cholesky decomposition. We have applied low rank approximation to each block of its decomposition to enhance computation efficiency and to save memory cost while accuracy is preserved.
+\citet{hackbusch2015hierarchical} proposed adopting hierarchical matrix and its Cholesky decomposition. We have applied low rank approximation to each block of its decomposition to enhance computation efficiency and to save memory cost while accuracy is preserved.
 $A=LU$have the structure
 $$\begin{pmatrix}A_{11}&A_{12}\\A_{21}&A_{22}\end{pmatrix}=\begin{pmatrix}L_{11}&O\\L_{21}&L_{22}\end{pmatrix}\begin{pmatrix}L_{11}^T&L_{12}^T\\O&L_{22}^T\end{pmatrix}$$
 with lower triangular matrix $L_{11},L_{22}$.
