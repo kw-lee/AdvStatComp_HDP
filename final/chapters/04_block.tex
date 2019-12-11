@@ -1,7 +1,7 @@
 % 6. Block Reordering - 현석
 \section{Block Reordering}
 
-Summarizing the previous computations, value of probability based on $n$-dimensioned multivariate normal random variable comprises of $m$ multiplications of $d$-dimensional integrals. The idea arose from the construction of hierarchical Cholesky decomposition of covariance matrix, which enables concentration of high correlation values in the block diagonal area. As a consequence, correlation within blocks(or, group of compositions) are high while correlation between blocks(between groups) are low. Recall the \texttt{RCMVN} algorithm(\ref{alg:CMVN}) : as computing each $d$-dimensional integral values, integration variables were arranged in order of increasing order of \texttt{CMVN} probability values, from outer to inner. Trinh and Genz (2015) discovered that this reordering improves overall accuracy. In this sense, the authors adopted block reordering procedure. Briefly speaking, this procedure permutes the block of LDL-decomposed covariance matrix, in order of \texttt{RCMVN} probability values of each blocks. On the top left corner, the block with minimal probability value get its place. Algorithm \ref{alg:BR} is the block reordering algorithm introduced in \citet{cao2019hierarchical}.
+In sum, value of probability based on $n$-dimensioned multivariate normal random variable comprises of $m$ multiplications of $d$-dimensional integrals. The idea arose from the construction of hierarchical Cholesky decomposition of covariance matrix, which enables concentration of high correlation values in the block diagonal area. As a consequence, correlation within blocks(or, group of compositions) are high while correlation between blocks(between groups) are low. Recall the \texttt{RCMVN} algorithm(\ref{alg:CMVN}) : as computing each $d$-dimensional integral values, integration variables were arranged in order of increasing order of \texttt{CMVN} probability values, from outer to inner. Trinh and Genz (2015) discovered that this reordering improves overall accuracy. In this sense, the authors adopted block reordering procedure. Briefly speaking, this procedure permutes the block of LDL-decomposed covariance matrix, in order of \texttt{RCMVN} probability values of each blocks. On the top left corner, the block with minimal probability value get its place. Algorithm \ref{alg:BR} is the block reordering algorithm introduced in \citet{cao2019hierarchical}.
 
 \begin{algorithm}[ht]
     \caption{Blockwise reordering}
@@ -21,7 +21,7 @@ Summarizing the previous computations, value of probability based on $n$-dimensi
     \end{algorithmic}\label{alg:BR}
 \end{algorithm}
 
-Here, sort function arranges elements in the vector `ind' in an increasing order based on $\mathbf{P}$. Also, $G$ means the intrinsic geometry of data. In practice, we set the geometry as 2D isotropic exponential covariance model, assuming data observation occured in unit square grid, indices arranged based on Morton order of level 1. The paper implemented the comparison between computing \texttt{HMVN}, \texttt{HCMVN}, \texttt{HRCMVN} values with or without block reordering procedure. Commonly, block reordering procedure places on the way before implementing hierarchical decomposition. For example, one can derive Algorithm \ref{alg:hmvn_bro} as a \texttt{HCMVN} procedure with block reordering.
+Sort function arranges elements in the vector `ind' in an increasing order based on $\mathbf{P}$. Also, $G$ means the intrinsic geometry of data. In practice, we set the geometry as 2D isotropic exponential covariance model, assuming data observation occured in unit square grid, indices arranged based on Morton order of level 1. The paper implemented the comparison between computing \texttt{HMVN}, \texttt{HCMVN}, \texttt{HRCMVN} values with or without block reordering procedure. Commonly, block reordering procedure places on the way before implementing hierarchical decomposition. For example, one can derive Algorithm \ref{alg:hmvn_bro} as a \texttt{HCMVN} procedure with block reordering.
 
 \begin{algorithm}[!h]
     \caption{Hierarchical-block conditioning algorithm with Block Reordering}
@@ -49,7 +49,7 @@ Here, sort function arranges elements in the vector `ind' in an increasing order
     \end{algorithmic}\label{alg:hmvn_bro}
 \end{algorithm}
 
-Block reordering aims for improving accuracy rather than shortening computation time. According to the simulation result introduced in \citet{cao2019hierarchical}, the extra time used for running block reordering is relatively small compared with the total time costs. 
+Block reordering aims for improving accuracy rather than shortening computation time. According to the simulation result introduced in \citet{cao2019hierarchical}, the extra time used for running block reordering is relatively small compared to the total time costs. 
 
 % The table below displays the running time for block reordering procedure and its condition($m$ is fixed as $4$).
 
