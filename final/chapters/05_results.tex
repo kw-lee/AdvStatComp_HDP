@@ -4,7 +4,7 @@ In this section, we show you the results of implementing and experimenting with 
 
 \subsection{Cholesky Factorization}
 
-The \textit{chol} function from \textbf{LinearAlgebra} package, the \textit{dpotrf} from \textbf{LAPACK} package, and hierarchical cholesky decomposition which suggested by \citet{hackbusch2015hierarchical} are implemented. Exponential covariance matrix, $\boldsymbol{\Sigma}_{ij}=exp(-\lVert \mathbf{s}_i-\mathbf{s}_j \rVert/\beta)$ is set with $\beta=0.3$. $n$ points, $\mathbf{s}_1,\cdots,\mathbf{s}_n$ is evenly distributed over unique square with Morton's order which defined recursively as described in figure \ref{fig:morton}.
+The \textit{chol} function from \textbf{LinearAlgebra} package, the \textit{dpotrf} from \textbf{LAPACK} package, and hierarchical Cholesky decomposition which suggested by \citet{hackbusch2015hierarchical} are implemented. Exponential covariance matrix, $\boldsymbol{\Sigma}_{ij}=exp(-\lVert \mathbf{s}_i-\mathbf{s}_j \rVert/\beta)$ is set with $\beta=0.3$. $n$ points, $\mathbf{s}_1,\cdots,\mathbf{s}_n$ is evenly distributed over unique square with Morton's order which defined recursively as described in figure \ref{fig:morton}.
 
 \begin{figure}[ht]
 \centering
@@ -24,14 +24,14 @@ With various $n$, three Cholesky methods are applied and results are below table
 			n & 256 & 1024 & 4096 & 16384 \\ \midrule
 			chol & 0.001s & 0.0097s & 0.414s & 156.3s \\
 			dpotrf & 0.0007s & 0.0132s & 0.431s & 154.1s \\
-			hierarchical cholesky & 0.153s & 0.076s & 0.916s & 37.3s \\
-			Error of hierarchical cholesky & 1.06e-7 & 9.97e-7 & 1.11e-3 & 1.87e-3 \\  \bottomrule
+			hierarchical Cholesky & 0.153s & 0.076s & 0.916s & 37.3s \\
+			Error of hierarchical Cholesky & 1.06e-7 & 9.97e-7 & 1.11e-3 & 1.87e-3 \\  \bottomrule
 		\end{tabular}%
 	}
 	\caption{Excution times for Cholesky factorization}
 	\label{tab:table1}
 \end{table}
-Hierarchical cholesky decomposition is more efficient than other classical cholesky method with large dimension. Hierarchical cholesky decomposition provides $\boldsymbol{\Sigma}\approx L_HL_H^T$. Its relative error is defined as $\frac{\lVert\boldsymbol{\Sigma}-L_HL_H^T\rVert_2}{\lVert\boldsymbol{\Sigma}\rVert_2}$, and table \ref{tab:table1} ensures accuracy of hierarchical cholesky decomposition proposed by \citet{hackbusch2015hierarchical}.
+Hierarchical Cholesky decomposition is more efficient than other classical Cholesky method with large dimension. Hierarchical Cholesky decomposition provides $\boldsymbol{\Sigma}\approx L_HL_H^T$. Its relative error is defined as $\frac{\lVert\boldsymbol{\Sigma}-L_HL_H^T\rVert_2}{\lVert\boldsymbol{\Sigma}\rVert_2}$, and table \ref{tab:table1} ensures accuracy of hierarchical Cholesky decomposition proposed by \citet{hackbusch2015hierarchical}.
 
 
 \subsection{Multivariate Normal Probabilities} 
@@ -192,9 +192,9 @@ We set the integration limits $a_i=-\infty$ and $b_i\sim(U,n)$ for $i=1\cdots,n$
 			\caption{Execution time (seconds) under the constant covariance structure and 1D exponential covariance structure}\label{fig:table3_time}
 \end{figure}	
 
-Note the excution times of M2 and M3 are significantly smaller than of M1 even their performances are similar.
+Note the execution times of M2 and M3 are significantly smaller than that of M1 even their performances are similar.
 
-Next, we give simulation with a 2D exponential covariance matrix using morton's order for indexing the sample points on the plane. We fix $m = 8$ for the 2D covariance structure and examine the effectiveness of our algorithm varying $d =1,2,4$. To test the sensitivity with respect to the correlation strength, we perform the estimation under $\beta = 0.3, 0.1$, and 0.03, representing strong, medium, and weak correlation strengths. We set $n$ to 16, 64, 256 and other settings are same as above. Table \ref{tab:table5} presents the results.
+Next, we conducted computer simulations with a 2D exponential covariance matrix, based on the sample points arranged by Morton's order. We fix $m = 8$ for 2D covariance structure and examine the efficiency of our algorithm, with $d =1,2,4$. To test sensitivity with respect to correlation strength, we perform the estimation under $\beta = 0.3, 0.1$, and 0.03, where each values represent strong, medium, and weak correlation strengths. We set $n$ to 16, 64, 256 and other settings are same as above. Table \ref{tab:table5} presents the results.
 
 \begin{table}[h]
 	\centering
@@ -238,7 +238,7 @@ In this experiment, \citet{cao2019hierarchical} mentioned
 \begin{quote}
 	It is worth mentioning that the correlation strength is essentially increased when $n$ increases while $\beta$ remains unchanged because the samples are from the unit hypercube. Also the increase of $d$ will reduce the estimation error but is still unable to reach a satisfactory level. The method, when used without a reordering strategy, does not produce sufﬁciently accurate results. This motivated the development of the reordering strategy described in the next section
 \end{quote}
-with extremely large size simulation. But, in our experiment, above phenomenon could not be observed due to restriction of the computing resource.
+with extremely large size simulation. But, in our case, the phenomenon stated above could not be observed due to shortage of computing resource we had.
 
 % \subsection{Block Reordering}
 % Block Reordering - 현석 (table 5, 6)
